@@ -1,0 +1,27 @@
+{
+  "name": "dohyo-2",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "道標 2 — 健康人生設計プラン v7.4 実行支援 PWA",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync 2>/dev/null || true && svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "@tsconfig/svelte": "^5.0.4",
+    "@vite-pwa/assets-generator": "^0.2.6",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.5.0",
+    "vite": "^6.0.0",
+    "vite-plugin-pwa": "^0.21.0",
+    "workbox-window": "^7.1.0"
+  },
+  "dependencies": {
+    "dexie": "^4.0.8"
+  }
+}

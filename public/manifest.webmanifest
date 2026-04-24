@@ -1,0 +1,23 @@
+{
+  "name": "道標 2",
+  "short_name": "道標 2",
+  "description": "健康人生設計プラン v7.4 実行支援 PWA",
+  "id": "/health-plan-app/",
+  "start_url": "/health-plan-app/",
+  "scope": "/health-plan-app/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF8F4",
+  "theme_color": "#1B2B4A",
+  "icons": [
+    { "src": "icons/pwa-64x64.png", "sizes": "64x64", "type": "image/png" },
+    { "src": "icons/pwa-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/pwa-512x512.png", "sizes": "512x512", "type": "image/png" },
+    {
+      "src": "icons/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
