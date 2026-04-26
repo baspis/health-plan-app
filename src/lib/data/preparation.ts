@@ -1,11 +1,24 @@
 export type PrepGroup = 'tools' | 'medical' | 'app' | 'environment';
 
+export type PickSource = 'yodobashi' | 'amazon-direct' | 'official' | 'service';
+
 export interface PrepLink {
   label: string;
   url: string;
 }
 
+export interface ProductPick {
+  source: PickSource;
+  productName: string;
+  price?: string;
+  url: string;
+  color?: string;
+  quantity?: string;
+  note?: string;
+}
+
 export interface PrepSpec {
+  pick?: ProductPick;
   must: string[];
   why: string;
   primaryLink?: PrepLink;
@@ -61,253 +74,262 @@ export const PREP_GROUPS: PrepGroupMeta[] = [
 ];
 
 export const PREP_ITEMS: PrepItem[] = [
-  // ===== Tools (10 items: 8 + tool-food-initial を 3 分割) =====
+  // ===== Tools (10 items) =====
   {
     id: 'tool-bands',
     group: 'tools',
-    title: 'STEADY ST105 ループバンド 3 段階',
-    summary: '日本設計、3 強度、収納袋 + 動画付き',
-    cost: '約 ¥1,800',
+    title: 'レジスタンスバンド 3 強度',
+    summary: 'D&M セラバンド フォーエントリー、医療リハビリ業界標準品',
+    cost: '¥3,300（¥1,100 × 3 本）',
     spec: {
-      must: [
-        'ループ式（リング状の輪っか、持ち手付チューブ式は NG）',
-        '3 段階セット（軽・中・強）',
-        '天然ゴム素材',
-        '日本設計、1 年保証',
-        '評価 4.0 星以上'
-      ],
-      why: '体重 110 kg + アパート 2F の静音条件で、持ち手なしのループ式は背中・脚種目に使い回しが効く。STEADY は日本設計でレビュー多数、Phase 3 で物足りなくなったらダンベル / ジムへ移行（ADR-018）。',
-      primaryLink: {
-        label: 'Amazon: STEADY ST105 を買う',
-        url: 'https://www.amazon.co.jp/dp/B07HK7PZ5D'
+      pick: {
+        source: 'yodobashi',
+        productName: 'D&M セラバンド フォーエントリー 1m TBE3 (赤 +1) / TBE4 (青 +2) / TBE5 (黒 +3) を 3 本まとめ買い',
+        price: '¥1,100 × 3 本 = ¥3,300（ヨドバシ 10% 還元で実質 ¥2,970）',
+        url: 'https://www.yodobashi.com/?word=%E3%82%BB%E3%83%A9%E3%83%90%E3%83%B3%E3%83%89+%E3%83%95%E3%82%A9%E3%83%BC%E3%82%A8%E3%83%B3%E3%83%88%E3%83%AA%E3%83%BC',
+        quantity: '軽 (TBE3 赤) / 中 (TBE4 青) / 強 (TBE5 黒) を各 1 本',
+        note: '医療リハビリ業界標準のセラバンド。中国系の安価ループバンドより耐久性・信頼性が圧倒的に高い。リボン状で結ぶ・握る・ループ化すべて自由。'
       },
+      must: [
+        'D&M ブランド（医療品質ラテックス）',
+        '3 強度すべて: TBE3 (赤 +1) / TBE4 (青 +2) / TBE5 (黒 +3)',
+        '各 1 m カット済',
+        'フォーエントリーシリーズ（家庭用品質）'
+      ],
+      why: '医療リハビリ現場で使われる業界標準品。安価な中国系ループバンドは強度表記がいい加減で、すぐ切れたり臭いがきつい個体差が大きい。D&M は強度差が物性として保証されている。',
       avoid: [
-        '軽 1-3 lb の超低負荷だけのセット（Phase 3 で鍛えられない）',
-        '持ち手付きチューブ式（背中・スクワットで使いにくい）',
-        '厚み 0.8 mm 以下の薄手（切れる）',
-        'ファブリック生地巻きタイプ（高価で耐久性差なし）',
-        '体重制限が明記されていない無名ブランド'
+        '中国系の安価ループバンドセット（強度差が表記通りでない、すぐ切れる）',
+        '持ち手付きチューブ式（用途が限定される）',
+        'D&M でも単品販売の TBE4 だけ購入（強度差が体感できない）',
+        'ファブリック生地巻きタイプ（高価で耐久性差なし）'
       ],
       verify: [
         '3 本それぞれ手で引いて強度差が明確に体感できる',
-        '継ぎ目（接合部）に剥がれや薄い箇所がない',
-        '強バンドを足で踏んで両手で引いても急に切れる気配がない'
+        '梱包に「D&M」「TBE3 / TBE4 / TBE5」のラベルが正しく入っている',
+        'ラテックスのにおいが許容範囲（数日陰干しで消える程度）'
       ]
     }
   },
   {
     id: 'tool-yogamat',
     group: 'tools',
-    title: 'Amazonベーシック ヨガマット 12 mm',
-    summary: '188×61×1.2 cm NBR、キャリーストラップ付き',
-    cost: '約 ¥3,000',
+    title: 'ヨガマット 12 mm 厚',
+    summary: 'loopa（プラヴィダ）公式、110 kg 対応、アパート 2F 防音',
+    cost: '¥3,300-3,800',
     spec: {
-      must: [
-        '厚み 12 mm（6 mm 以下は NG、騒音遮断不足）',
-        'サイズ 188 × 61 × 1.2 cm',
-        'NBR 素材（ニトリルブタジエンゴム）',
-        'キャリーストラップ付き',
-        '評価 4.3 星以上'
-      ],
-      why: '体重 110 kg + アパート 2F の振動・騒音を抑えるため厚 12 mm の NBR が必須。Amazonベーシックはコスパ・耐久性のバランスが良くレビュー多数。リビング常設で AF+ ヨガと筋トレ両用。',
-      primaryLink: {
-        label: 'Amazon: Amazonベーシック ヨガマット 12mm',
-        url: 'https://www.amazon.co.jp/s?k=Amazon%E3%83%99%E3%83%BC%E3%82%B7%E3%83%83%E3%82%AF+%E3%83%A8%E3%82%AC%E3%83%9E%E3%83%83%E3%83%88+12mm'
+      pick: {
+        source: 'official',
+        productName: 'loopa ヨガマット 12 mm（183 × 61 cm、NBR、ストラップ付き）',
+        price: '¥3,300-3,800（送料別）',
+        url: 'https://puravida.co.jp/products/401100001',
+        note: 'ヨドバシでは 12 mm 厚 NBR 183 cm 該当商品なし。loopa（プラヴィダ）公式が最善。在庫切れ時は次点でヨガワークス ピラティスマット 12 mm（173 × 61 cm）。'
       },
+      must: [
+        '厚み 12 mm（6 mm 以下は防音不足で NG）',
+        'サイズ 183 cm × 61 cm（身長 182 cm 対応）',
+        'NBR 素材（ニトリルブタジエンゴム）',
+        '両面エンボス加工',
+        'ストラップ付き（収納時に巻きやすい）'
+      ],
+      why: '体重 110 kg + アパート 2F の振動・騒音抑制で 12 mm 厚 NBR が必須。AF+ ヨガと AF+ 筋トレ両用、リビング常設。',
+      altLinks: [
+        {
+          label: '次点: ヨガワークス ピラティスマット 12mm（173×61cm）',
+          url: 'https://www.yogaworks.jp/products/piratesmat'
+        }
+      ],
       avoid: [
-        '厚み 6 mm / 8 mm（防音不足）',
-        'TPE 素材の薄手（耐久性とクッション不足）',
-        '長さ 173 cm 以下（身長 182 cm では足が出る）',
-        'PVC 素材（化学臭が強くリビング常設不向き）'
+        '厚み 6 mm / 8 mm（騒音遮断不足）',
+        'TPE 素材の薄手（耐久性不足）',
+        '長さ 173 cm 以下のヨガワークス以外（身長 182 cm では足が出る）',
+        'PVC 素材（化学臭がきつくリビング常設不向き）',
+        '楽天市場の中国系ノーブランド（裏面の滑り止めが品質保証されていない）'
       ],
       verify: [
         '広げて 5 分置いて反り癖が取れる',
-        '裏面のグリップ加工で滑らない',
-        '化学臭がきつくない（数日陰干しで消える程度はOK）'
+        '両面のエンボスパターンに違いがある',
+        '化学臭が許容範囲（数日陰干しで消える程度）'
       ]
     }
   },
   {
     id: 'tool-shaker',
     group: 'tools',
-    title: 'マイプロテイン Pro Metal Shaker 750ml',
-    summary: 'ねじ式メタル、ステンレススチール製',
-    cost: '約 ¥2,000',
+    title: 'プロテインシェイカー 700 ml',
+    summary: 'ShakeSphere タンブラーオリジナル、ボール不要のスフィア構造',
+    cost: '¥4,620',
     spec: {
-      must: [
-        '容量 750 ml',
-        'ステンレススチール製、ねじ式キャップ',
-        '全長 230 mm、上部直径 94 mm',
-        'マイプロテイン純正'
-      ],
-      why: 'マイプロテイン Impact ホエイ 30 g + 水 400 ml がストレスなく振れる容量。ねじ式ステンレスは耐久性が高く、ぬるま湯対応で衛生管理しやすい。',
-      primaryLink: {
-        label: 'Amazon: マイプロテイン Pro Metal Shaker 750ml を買う',
-        url: 'https://www.amazon.co.jp/dp/B08QV6TL4L'
+      pick: {
+        source: 'official',
+        productName: 'ShakeSphere タンブラーオリジナル 700 ml（フロステッドブラック / ホワイトロゴ）',
+        price: '¥4,620',
+        url: 'https://shakespherejp.com/products/shakesphere-tumbler-frosted-black-with-white-logo',
+        color: 'フロステッドブラック / ホワイトロゴ',
+        note: 'ボール内蔵不要のスフィア構造で、振り混ぜるだけでダマなし。漏れない設計、口径広めで洗いやすい。'
       },
+      must: [
+        '容量 700 ml',
+        'スフィア構造（内部が球状で攪拌、ボール不要）',
+        '蓋がしっかり閉まる（漏れない）',
+        '口径広め（洗いやすい）',
+        '食洗機対応'
+      ],
+      why: 'マイプロテイン Impact ホエイ 30 g + 水 400 ml がストレスなく振れる容量。ShakeSphere のスフィア構造は中にメッシュ・ボール不要で洗いやすく、ダマも残らない。',
       altLinks: [
         {
-          label: 'マイプロテイン公式',
-          url: 'https://www.myprotein.jp/'
+          label: 'Twins-Corp（日本総代理店）',
+          url: 'https://shop.twins-corp.com/products/protein-shaker-bottle-700mls-tumbler-original'
         }
       ],
       avoid: [
         '容量 500 ml 以下（30 g + 水で容量不足）',
         '蓋がパカッと開く非ねじ式（振ると漏れる）',
-        'ボール内蔵タイプの安物（洗いにくく不衛生）',
-        'ShakeSphere のスライド式（特殊形状、ねじ式ではない）'
+        'ボール内蔵タイプの安物（洗いにくく不衛生、ボール紛失リスク）',
+        'Amazon マーケットプレイスの並行輸入品（保証なし）'
       ],
       verify: [
         '水を半分入れて振って漏れがない',
-        'キャップ内側のフィン構造を細いブラシで洗う準備をしておく',
-        'ステンレスのため保温なし、内容物の温度は変わる前提'
+        '蓋を閉めた状態で飲み口がしっかり閉じる',
+        '内部に余計なボールやメッシュが入っていない（スフィア構造）'
       ]
     }
   },
   {
     id: 'tool-bottle',
     group: 'tools',
-    title: 'サーモス JOY-1000 1L マグ',
-    summary: '真空断熱ケータイマグ、キャリーループ付き',
+    title: '1 L 水筒',
+    summary: 'サーモス JOY-1000、ヨドバシ 10% 還元',
     cost: '¥3,350',
     spec: {
-      must: [
-        '型番 JOY-1000（容量 1.0 L）',
-        '真空断熱ステンレス、キャリーループ付き',
-        '保温効力 6 時間で 75 ℃以上、保冷効力 6 時間で 9 ℃以下',
-        '本体寸法 約 8.5 × 8.5 × 28 cm、重量 約 0.4 kg'
-      ],
-      why: 'デスク常設、空になったら即補充ルーチンに最適。500 ml だと補充頻度が高くなり摩擦増。サーモスの 1 L は JOY-1000（キャリーループ）か JOW-1000（スクリューマグ）。ヨドバシでは JOY-1000 が確実に入手できる。',
-      primaryLink: {
-        label: 'ヨドバシ.com: サーモス JOY-1000-ASG を買う',
-        url: 'https://www.yodobashi.com/product/100000001008913907/'
+      pick: {
+        source: 'yodobashi',
+        productName: 'サーモス 真空断熱ケータイマグ JOY-1000（チャコール）',
+        price: '¥3,350（ヨドバシ 10% 還元で実質 ¥3,015）',
+        url: 'https://www.yodobashi.com/product/100000001008913907/',
+        color: 'チャコール推奨（汚れ目立ちにくい）。他にアッシュグリーン / ライトパープル / ネイビー',
+        note: '旧 docs に書いた JNR-1000 は実在せず（v7.4.5 で訂正）。現行 1L はキャリーループ付き JOY-1000。保温 75℃以上 6h、保冷 9℃以下 6h、全パーツ食洗機対応。'
       },
-      altLinks: [
-        {
-          label: 'サーモス公式: JOW-1000（スクリューマグ版）',
-          url: 'https://www.shopthermos.jp/shop/g/g300067520000/'
-        }
+      must: [
+        '容量 1.0 L',
+        'サーモス JOY-1000（型番固定）',
+        '真空断熱ステンレス',
+        'スクリュータイプ（ねじ式蓋）',
+        'キャリーループ付き'
       ],
+      why: 'デスク常設、空になったら即補充。500 ml だと補充頻度が高くなり摩擦増。JOY-1000 は全パーツ食洗機対応で衛生管理が楽。',
       avoid: [
-        '500 ml の小型（補充頻度高すぎ）',
-        '保温なしのプラスチック樹脂タイプ',
-        'JNR-1000（型番として存在しない、JNR シリーズは 600 ml 以下）',
-        '直飲みでない別売コップ式（手間が増える）'
+        '500 ml サイズ（補充頻度が高すぎる）',
+        '保温なしの樹脂タイプ',
+        '直飲みでない別売コップ式（手間増）',
+        'JNR-1000（旧 docs の型番、実在しない）'
       ],
       verify: [
-        '型番 JOY-1000 が本体または箱に印字されている',
+        '型番 JOY-1000 が本体に印字されている',
         '満水で逆さにして 30 秒漏れない',
-        'キャリーループにストラップを通せる'
+        '蓋がスクリュー式で確実に閉まる'
       ]
     }
   },
   {
     id: 'tool-bento',
     group: 'tools',
-    title: '旭化成 業務用ジップロック 正方形 700ml × 2 箱',
-    summary: '10 個入り × 2 = 計 20 個、週 12 個回転',
-    cost: '約 ¥3,200（¥1,600 × 2）',
+    title: '弁当コンテナ 700 ml × 20',
+    summary: '旭化成 業務用ジップロック 正方形 700 ml × 2 セット',
+    cost: '約 ¥4,040',
     spec: {
-      must: [
-        '旭化成ホームプロダクツ 業務用 ジップロック コンテナー 正方形 700 ml',
-        '10 個入り × 2 セット（合計 20 個）',
-        'サイズ 156 × 156 × 53 mm、ポリプロピレン製',
-        '耐熱 140 ℃、耐冷 -20 ℃（冷凍 → レンジ加熱 OK）'
-      ],
-      why: '正方形は冷凍庫・冷蔵庫で積み重ね効率が最高。業務用 10 個入りはコスパ良好（¥1,600/箱）。週 4 食 × 3 パターン + 予備 4 個 + 週末 4 個 = 計 12 個回転（[ADR-019](DECISIONS.md)）。',
-      primaryLink: {
-        label: 'Amazon: 業務用ジップロック 正方形 700ml 10個入',
-        url: 'https://www.amazon.co.jp/s?k=%E6%A5%AD%E5%8B%99%E7%94%A8%E3%82%B8%E3%83%83%E3%83%97%E3%83%AD%E3%83%83%E3%82%AF+%E6%AD%A3%E6%96%B9%E5%BD%A2+700ml+10%E5%80%8B'
+      pick: {
+        source: 'amazon-direct',
+        productName: '旭化成 業務用ジップロック コンテナー 正方形 700 ml 10 個入',
+        price: '約 ¥2,020 × 2 セット = ¥4,040（Amazon 直販）',
+        url: 'https://www.amazon.co.jp/s?k=%E6%97%AD%E5%8C%96%E6%88%90+%E6%A5%AD%E5%8B%99%E7%94%A8+%E3%82%B8%E3%83%83%E3%83%97%E3%83%AD%E3%83%83%E3%82%AF+%E6%AD%A3%E6%96%B9%E5%BD%A2+700ml+10%E5%80%8B%E5%85%A5&emi=AN1VRQENFRJN5',
+        quantity: '10 個入 × 2 セット（合計 20 個）',
+        note: 'ヨドバシでは正方形 700 ml の取扱なし、Amazon 直販で旭化成正規流通品を購入。サイズ 156 × 156 × 53 mm、耐熱 140℃ / 耐冷 -20℃、レンジ加熱 OK。'
       },
-      altLinks: [
-        {
-          label: 'アスクル（業務用 10 個入 1 箱）',
-          url: 'http://www.askul.co.jp/p/1972308/'
-        }
+      must: [
+        '旭化成 業務用ジップロック コンテナー 正方形 700 ml',
+        '10 個入を 2 セット（合計 20 個）',
+        '正方形（積み重ね効率）',
+        'Amazon 直販（マーケットプレイス NG）'
       ],
+      why: '正方形は冷凍庫・冷蔵庫で積み重ね効率が高い。週 4 食 × 3 パターン + 予備 4 個 + 週末 4 個 = 計 12 個回転（[ADR-019](DECISIONS.md)）。Amazon 直販絞り込み URL なら正規流通品が確実。',
       avoid: [
         '楕円形・長方形（積み重ね効率が悪い）',
         '容量 500 ml 以下（玄米 150 g + 主菜 + 副菜が入らない）',
-        '家庭用 4 個入り（単価高、必要数 20 個に届くまで何個も買うはめになる）',
-        '蓋一体型でレンジ不可（毎食加熱時に詰め替え必要）'
+        'Amazon マーケットプレイス（並行輸入や転売の可能性）',
+        '無名ブランドの薄い容器（数回で割れる）'
       ],
       verify: [
-        '20 個揃っている（10 個 × 2 箱）',
-        'フタの中央を押すとパチンと閉まる密閉構造',
-        '冷凍 → レンジ加熱の流れで蓋を外せば耐熱 140 ℃'
+        '20 個揃っている（10 個 × 2 セット）',
+        '蓋に「電子レンジ可」マーク',
+        '蓋を閉めて水を入れて逆さにして漏れない'
       ]
     }
   },
   {
     id: 'tool-rice',
     group: 'tools',
-    title: '旭化成 ジップロック 正方形 500ml 4個入',
-    summary: '玄米 1 食 150 g の小分け冷凍用',
+    title: '玄米小分けコンテナ 500 ml × 4',
+    summary: '旭化成 ジップロック 正方形 500 ml × 1 セット',
     cost: '約 ¥800',
     spec: {
+      pick: {
+        source: 'amazon-direct',
+        productName: '旭化成 ジップロック コンテナー 正方形 500 ml 4 個入',
+        price: '約 ¥800（Amazon 直販）',
+        url: 'https://www.amazon.co.jp/s?k=%E6%97%AD%E5%8C%96%E6%88%90+%E3%82%B8%E3%83%83%E3%83%97%E3%83%AD%E3%83%83%E3%82%AF+%E3%82%B3%E3%83%B3%E3%83%86%E3%83%8A%E3%83%BC+%E6%AD%A3%E6%96%B9%E5%BD%A2+500ml+4%E5%80%8B%E5%85%A5&emi=AN1VRQENFRJN5',
+        quantity: '4 個入 × 1 セット',
+        note: '玄米 150 g がぴったり入るサイズ。週末バッチ調理 → 平日レンジ加熱用。Amazon 直販絞り込みで購入。'
+      },
       must: [
         '旭化成 ジップロック コンテナー 正方形 500 ml',
-        '4 個入り 1 パック（家庭用）',
-        '電子レンジ対応（蓋を外して）',
-        '冷凍庫 → レンジ加熱の流れで使える'
+        '4 個入',
+        'Amazon 直販'
       ],
-      why: '玄米 150 g がぴったり入るサイズ。週末バッチ調理時の小分け冷凍 → 平日レンジ加熱用。700 ml と同シリーズで揃えると見た目も統一。',
-      primaryLink: {
-        label: 'Amazon: ジップロック 正方形 500ml 4個入',
-        url: 'https://www.amazon.co.jp/s?k=%E3%82%B8%E3%83%83%E3%83%97%E3%83%AD%E3%83%83%E3%82%AF+%E3%82%B3%E3%83%B3%E3%83%86%E3%83%8A%E3%83%BC+%E6%AD%A3%E6%96%B9%E5%BD%A2+500ml+4%E5%80%8B%E5%85%A5'
-      },
+      why: '玄米 150 g が 1 食ぴったり。週末バッチ → 冷凍 → 平日レンジ加熱の運用に最適サイズ。',
       avoid: [
-        '700 ml と同じ見た目で混ざる別ブランド',
+        '700 ml と同じパッケージで混ざるもの（区別できない）',
         '丸型（冷凍庫の隅に空間が出る）',
-        '別ブランドの 500 ml（ジップロック 700 ml と積み重ねた時にズレる）'
+        'Amazon マーケットプレイス'
       ],
       verify: [
         '500 ml 表記がある',
-        '700 ml の弁当コンテナと積み重ね可能な正方形'
+        '700 ml の弁当コンテナと積み重ね可能な正方形',
+        '4 個揃っている'
       ]
     }
   },
   {
     id: 'tool-bp',
     group: 'tools',
-    title: 'オムロン HEM-7281T 上腕式血圧計',
-    summary: 'Bluetooth 通信、フィットカフ、早朝高血圧確認',
-    cost: '¥15,645（ヤマダ）〜 ¥18,800（オムロン公式）',
+    title: '家庭血圧計（上腕式）',
+    summary: 'オムロン HCR-7308T2、フィットカフ + iPhone 連携',
+    cost: '¥12,190（実質 ¥10,971）',
     spec: {
-      must: [
-        'オムロン 上腕式 HEM-7281T（型番固定）',
-        'フィットカフ：片手で簡単装着、ズレ補正',
-        'カフぴったり巻きチェック機能',
-        '対象腕周 17-36 cm（標準的な日本人男性をカバー）',
-        'メモリ 2 人 × 100 回',
-        '専用 AC アダプタ付属'
-      ],
-      why: '日本高血圧学会の家庭血圧ガイドラインは上腕式を推奨。手首式は精度がブレやすく医療判断に使えない。HEM-7281T は早朝高血圧を自動通知してくれて家庭血圧 1 週間測定に最適。',
-      primaryLink: {
-        label: 'Amazon: オムロン HEM-7281T を買う',
-        url: 'https://www.amazon.co.jp/s?k=%E3%82%AA%E3%83%A0%E3%83%AD%E3%83%B3+HEM-7281T'
+      pick: {
+        source: 'yodobashi',
+        productName: 'オムロン 上腕式血圧計 HCR-7308T2',
+        price: '¥12,190（ヨドバシ 10% 還元で実質 ¥10,971）',
+        url: 'https://www.yodobashi.com/product/100000001008139433/',
+        note: '旧 docs に書いた HEM-7281T はヨドバシ取扱なし（v7.4.5 で訂正）。現行モデル HCR-7308T2 はフィットカフ搭載で片手装着可、OMRON connect で iPhone Bluetooth 連携、対象腕周 17-36 cm。'
       },
-      altLinks: [
-        {
-          label: 'ヤマダウェブコム（¥15,645）',
-          url: 'https://www.yamada-denkiweb.com/3460720013/'
-        },
-        {
-          label: 'オムロン ヘルスケアストア（¥18,800）',
-          url: 'https://store.healthcare.omron.co.jp/category/1/HEM_7281T.html'
-        }
+      must: [
+        '上腕式（手首式は精度不安定で NG）',
+        'オムロン HCR-7308T2',
+        'フィットカフ搭載（片手装着可）',
+        '対象腕周 17-36 cm（自分のサイズに対応）'
       ],
+      why: '日本高血圧学会の家庭血圧ガイドラインは上腕式を推奨。手首式は精度がブレやすく医療判断に使えない。HCR-7308T2 は OMRON connect で iPhone 連携できるので 1 週間の家庭血圧記録が楽。',
       avoid: [
         '手首式血圧計（精度不安定、医療判断に使えない）',
-        'アームカフが 22 cm 以上から対応していないモデル',
-        'HEM-1021 等の別機種（フィットカフ非搭載で巻きが甘くなる）',
-        'ヨドバシで HEM-7281T を探す（取扱なし）'
+        '対象腕周が 17 cm 以上から対応していないモデル',
+        '無名ブランド（精度未確認）',
+        'HEM-7281T（旧 docs の型番、ヨドバシ取扱なし）'
       ],
       verify: [
-        '型番 HEM-7281T が箱と本体に印字されている',
         '上腕にカフを巻いて 1 ボタンで測定が始まる',
         '試し測定で 110-140 / 65-90 mmHg の常識的な値が出る',
-        '電池駆動も AC アダプタ駆動も使える'
+        '電池が同梱されている（単 3 × 4 本）',
+        'OMRON connect アプリと Bluetooth ペアリング成功'
       ]
     }
   },
@@ -315,58 +337,62 @@ export const PREP_ITEMS: PrepItem[] = [
     id: 'tool-amazon-subscriptions',
     group: 'tools',
     title: 'Amazon 定期便 6 銘柄を契約',
-    summary: 'プロテイン・MV・あさげ・ナッツ・米保険・サバ缶',
+    summary: 'プロテインのみ公式、他 5 銘柄は Amazon 直販',
     cost: '初月 ¥15,144',
     spec: {
-      must: [
-        'マイプロテイン Impact ホエイ ナチュラルチョコ 1 kg × 2 袋',
-        'ネイチャーメイド スーパーマルチビタミン&ミネラル 120 粒（4 ヶ月分）',
-        '永谷園 フリーズドライあさげ 8 食 × 5 箱（40 食）',
-        '共立食品 食塩無添加ミックスナッツ 500 g',
-        'アイリスオーヤマ 低温製法米 150 g × 24 個（緊急保険）',
-        '伊藤食品 美味しい鯖水煮 食塩不使用 190 g × 5 缶'
-      ],
-      why: '常温保存の固定銘柄を Amazon 定期便で自動化。配送頻度はプロテインのみ毎月、他は数ヶ月に 1 回。Nosh は廃止（[ADR-003](DECISIONS.md)）。',
-      primaryLink: {
-        label: 'Amazon 定期おトク便ページ',
-        url: 'https://www.amazon.co.jp/auto-deliveries'
+      pick: {
+        source: 'amazon-direct',
+        productName: 'Amazon 定期おトク便を 6 銘柄まとめて設定（プロテインのみマイプロテイン公式）',
+        price: '月 ¥15,144（公式プロテイン ¥9,160 + Amazon 5 銘柄 ¥5,984）',
+        url: 'https://www.amazon.co.jp/auto-deliveries',
+        note: 'プロテインのみマイプロテイン公式（Amazon は並行輸入のため避ける）、他 5 銘柄は Amazon 直販絞り込みで定期便契約。下記 altLinks に各銘柄の URL。'
       },
+      must: [
+        'マイプロテイン Impact ホエイ ナチュラルチョコ 1 kg × 2 袋（公式）',
+        'ネイチャーメイド スーパーマルチビタミン&ミネラル 120 粒（Amazon 直販）',
+        '永谷園 フリーズドライあさげ 8 食 × 5 箱（Amazon 直販）',
+        '共立食品 食塩無添加ミックスナッツ 500 g（Amazon 直販）',
+        'アイリスオーヤマ 低温製法米 150 g × 24 個（Amazon 直販、緊急保険）',
+        '伊藤食品 美味しい鯖水煮 食塩不使用 190 g × 5 缶（Amazon 直販、緊急保険）'
+      ],
+      why: '常温保存の固定銘柄を Amazon 定期便で自動化。プロテインのみ公式が最安（Amazon は並行輸入で割高）。Nosh 廃止（[ADR-003](DECISIONS.md)）。',
       altLinks: [
         {
-          label: 'マイプロテイン Impact ホエイ（公式、Amazon より安い場合あり）',
+          label: 'マイプロテイン Impact ホエイ 1 kg ナチュラルチョコ（公式 ¥4,580）',
           url: 'https://www.myprotein.jp/p/sports-nutrition/impact-whey-protein-powder/10530943/'
         },
         {
-          label: 'Amazon: ネイチャーメイド マルチビタミン 120 粒',
-          url: 'https://www.amazon.co.jp/dp/B00516RULK'
+          label: 'Amazon 直販: ネイチャーメイド スーパーマルチビタミン 120 粒',
+          url: 'https://www.amazon.co.jp/s?k=%E3%83%8D%E3%82%A4%E3%83%81%E3%83%A3%E3%83%BC%E3%83%A1%E3%82%A4%E3%83%89+%E3%82%B9%E3%83%BC%E3%83%91%E3%83%BC%E3%83%9E%E3%83%AB%E3%83%81%E3%83%93%E3%82%BF%E3%83%9F%E3%83%B3%26%E3%83%9F%E3%83%8D%E3%83%A9%E3%83%AB+120%E7%B2%92&emi=AN1VRQENFRJN5'
         },
         {
-          label: 'Amazon: アイリスオーヤマ 低温製法米 150g×24',
-          url: 'https://www.amazon.co.jp/dp/B0C23XQWZJ'
+          label: 'Amazon 直販: 永谷園 フリーズドライあさげ 8 食×5 箱',
+          url: 'https://www.amazon.co.jp/s?k=%E6%B0%B8%E8%B0%B7%E5%9C%92+%E3%81%82%E3%81%95%E3%81%92+%E3%83%95%E3%83%AA%E3%83%BC%E3%82%BA%E3%83%89%E3%83%A9%E3%82%A4&emi=AN1VRQENFRJN5'
         },
         {
-          label: 'Amazon: 永谷園 あさげ',
-          url: 'https://www.amazon.co.jp/s?k=%E6%B0%B8%E8%B0%B7%E5%9C%92+%E3%81%82%E3%81%95%E3%81%92+%E3%83%95%E3%83%AA%E3%83%BC%E3%82%BA%E3%83%89%E3%83%A9%E3%82%A4'
+          label: 'Amazon 直販: 共立食品 素焼きミックスナッツ 500 g',
+          url: 'https://www.amazon.co.jp/s?k=%E5%85%B1%E7%AB%8B%E9%A3%9F%E5%93%81+%E7%B4%A0%E7%84%BC%E3%81%8D%E3%83%9F%E3%83%83%E3%82%AF%E3%82%B9%E3%83%8A%E3%83%83%E3%83%84+500g&emi=AN1VRQENFRJN5'
         },
         {
-          label: 'Amazon: 共立食品 素焼きミックスナッツ 500g',
-          url: 'https://www.amazon.co.jp/s?k=%E5%85%B1%E7%AB%8B%E9%A3%9F%E5%93%81+%E7%B4%A0%E7%84%BC%E3%81%8D%E3%83%9F%E3%83%83%E3%82%AF%E3%82%B9%E3%83%8A%E3%83%83%E3%83%84+500g'
+          label: 'Amazon 直販: アイリスオーヤマ 低温製法米 150g×24',
+          url: 'https://www.amazon.co.jp/s?k=%E3%82%A2%E3%82%A4%E3%83%AA%E3%82%B9%E3%82%AA%E3%83%BC%E3%83%A4%E3%83%9E+%E4%BD%8E%E6%B8%A9%E8%A3%BD%E6%B3%95%E7%B1%B3+150g&emi=AN1VRQENFRJN5'
         },
         {
-          label: 'Amazon: 伊藤食品 鯖水煮 食塩不使用',
-          url: 'https://www.amazon.co.jp/s?k=%E4%BC%8A%E8%97%A4%E9%A3%9F%E5%93%81+%E9%AF%96%E6%B0%B4%E7%85%AE+%E9%A3%9F%E5%A1%A9%E4%B8%8D%E4%BD%BF%E7%94%A8'
+          label: 'Amazon 直販: 伊藤食品 鯖水煮 食塩不使用 190g',
+          url: 'https://www.amazon.co.jp/s?k=%E4%BC%8A%E8%97%A4%E9%A3%9F%E5%93%81+%E7%BE%8E%E5%91%B3%E3%81%97%E3%81%84%E9%AF%96%E6%B0%B4%E7%85%AE+%E9%A3%9F%E5%A1%A9%E4%B8%8D%E4%BD%BF%E7%94%A8&emi=AN1VRQENFRJN5'
         }
       ],
       avoid: [
-        'マイプロテインを Amazon 経由のみで買う（公式の方が安い時期あり、両方比較）',
-        'マルチビタミンを別ブランド（ネイチャーメイドは粒が大きすぎず継続しやすい）',
-        '塩入りのサバ水煮缶（減塩方針に反する、必ず「食塩不使用」表記）',
-        '加塩あさげ（永谷園のフリーズドライ通常版は塩分そこそこあるが代替難、味噌汁は 1 日 1 杯ルール）'
+        'マイプロテインを Amazon で買う（並行輸入で割高、保証なし）',
+        '塩入りのサバ缶（必ず「食塩不使用」表記）',
+        '無印マルチビタミン（120 粒の「スーパーマルチビタミン&ミネラル」と混同しない）',
+        'Amazon マーケットプレイスの転売品'
       ],
       verify: [
         '定期便の配送頻度が銘柄ごとに正しい（プロテイン毎月、他は数ヶ月）',
-        '初回配送日が prep 完了想定の前後に入っている',
-        'マルチビタミンは「スーパーマルチビタミン&ミネラル」の方（無印マルチビタミンと混同しない）'
+        '初回配送日が prep 完了想定の前後',
+        'マルチビタミンは「スーパー」の方が届く',
+        'サバ缶が「食塩不使用」表記'
       ]
     }
   },
@@ -374,9 +400,16 @@ export const PREP_ITEMS: PrepItem[] = [
     id: 'tool-belx-first',
     group: 'tools',
     title: 'ベルクスで初回購入',
-    summary: '生鮮・乳製品・パン（毎週土曜の起点）',
+    summary: '生鮮・乳製品・パン（毎週土曜 10:00-11:00 起点）',
     cost: '¥7,200/月',
     spec: {
+      pick: {
+        source: 'service',
+        productName: 'ベルクス浦和原山店（毎週土曜 10:00-11:00、息子と徒歩往復）',
+        price: '初回 ¥1,800 程度（週分）',
+        url: 'https://www.google.com/maps/search/?api=1&query=%E3%83%99%E3%83%AB%E3%82%AF%E3%82%B9%E6%B5%A6%E5%92%8C%E5%8E%9F%E5%B1%B1%E5%BA%97',
+        note: 'iPhone メモアプリにベルクス固定リストを 1 ピン留めしておく。'
+      },
       must: [
         '赤玉 M サイズ 卵 10 個パック × 1.5（週分）',
         'おかめ納豆 極小粒ミニ 3（45 g × 3） × 2.5 パック（週分）',
@@ -386,10 +419,6 @@ export const PREP_ITEMS: PrepItem[] = [
         '玄米 5 kg 袋（店舗最安、銘柄こだわらず）'
       ],
       why: '土曜 10:00-11:00 に息子と徒歩で固定買い物（NEAT 増加 + 家族時間）。リスト以外を買わない＝甘いものを視界に入れない。',
-      primaryLink: {
-        label: 'Google マップ: ベルクス浦和原山店',
-        url: 'https://www.google.com/maps/search/?api=1&query=%E3%83%99%E3%83%AB%E3%82%AF%E3%82%B9%E6%B5%A6%E5%92%8C%E5%8E%9F%E5%B1%B1%E5%BA%97'
-      },
       avoid: [
         '甘い飲料・菓子・スナック（環境設計違反）',
         'リスト外の主菜（バッチ調理を圧迫）',
@@ -406,31 +435,34 @@ export const PREP_ITEMS: PrepItem[] = [
     id: 'tool-frozen-first',
     group: 'tools',
     title: '業務スーパーで初回購入',
-    summary: '冷凍主菜・副菜（3 パターンローテ用）',
+    summary: '冷凍主菜・副菜（3 パターンローテ用、隔週 or 月 1）',
     cost: '¥8,178/月',
     spec: {
+      pick: {
+        source: 'service',
+        productName: '業務スーパー浦和花月店（隔週 or 月 1 回土曜）',
+        price: '初回 約 ¥8,178',
+        url: 'https://www.google.com/maps/search/?api=1&query=%E6%A5%AD%E5%8B%99%E3%82%B9%E3%83%BC%E3%83%91%E3%83%BC%E6%B5%A6%E5%92%8C%E8%8A%B1%E6%9C%88%E5%BA%97',
+        note: '冷凍庫の空き状況を事前確認。3 パターン（A サバ / B 鶏胸 / C 豚ヒレ、[ADR-019](DECISIONS.md)）の 1 ヶ月分。'
+      },
       must: [
         '冷凍ブロッコリー 500 g × 4 袋（パターン A 用）',
         '冷凍ほうれん草 500 g × 2 袋 + 冷凍コーン 500 g × 2 袋（パターン B 用）',
         '冷凍オクラ 500 g × 2 袋 + 冷凍しめじ 500 g × 2 袋（パターン C 用）',
-        '塩不使用サバ切身 325 g × 4 袋（パターン A 主菜、月 16 切 + 予備 4）',
-        '国産鶏胸肉 1 kg × 1（パターン B 主菜、週 4 弁当 × 120 g）',
-        '国産豚ヒレ赤身 800 g × 1（パターン C 主菜、週 4 弁当 × 80 g）',
+        '塩不使用サバ切身 325 g × 4 袋（月 16 切 + 予備 4）',
+        '国産鶏胸肉 1 kg（週 4 弁当 × 120 g）',
+        '国産豚ヒレ赤身 800 g（週 4 弁当 × 80 g）',
         '冷凍ブルーベリー 500 g × 2 袋（朝ヨーグルト用）'
       ],
-      why: '3 パターンローテ（A サバ / B 鶏胸 / C 豚ヒレ、[ADR-019](DECISIONS.md)）の主菜と副菜を 1 ヶ月分まとめ買い。冷蔵 3 日 + 冷凍予備 4 + 週末用 4 = 計 12 個/週。',
-      primaryLink: {
-        label: 'Google マップ: 業務スーパー浦和花月店',
-        url: 'https://www.google.com/maps/search/?api=1&query=%E6%A5%AD%E5%8B%99%E3%82%B9%E3%83%BC%E3%83%91%E3%83%BC%E6%B5%A6%E5%92%8C%E8%8A%B1%E6%9C%88%E5%BA%97'
-      },
+      why: '3 パターンローテの主菜・副菜を 1 ヶ月分まとめ買い。冷蔵 3 日 + 冷凍予備 4 + 週末用 4 = 計 12 個/週。',
       avoid: [
-        '塩入りサバ切身（減塩方針違反、「塩不使用」または「減塩」を必ず確認）',
-        '中国産鶏肉（鶏胸は国産にこだわる、薬品残留リスク差）',
+        '塩入りサバ切身（必ず「塩不使用」または「減塩」を確認）',
+        '中国産鶏肉（鶏胸は国産にこだわる）',
         'タレ漬けの豚ヒレ（カロリー・塩分予測不能）',
         '味付き冷凍野菜（生に近いものを選ぶ）'
       ],
       verify: [
-        '冷凍庫に全部入るか事前確認（最悪は小型冷凍庫 ADR-019 発動）',
+        '冷凍庫に全部入るか事前確認',
         'サバが「塩不使用」または「減塩」表記',
         '鶏胸が国産表記',
         '豚ヒレが赤身（脂身少なめ）'
@@ -442,40 +474,39 @@ export const PREP_ITEMS: PrepItem[] = [
   {
     id: 'med-sas',
     group: 'medical',
-    title: '郵送型 SAS 検査キットを注文',
-    summary: '1 晩自宅で測定、AHI 値が報告される',
-    cost: '¥5,000-10,000',
+    title: '郵送型 SAS 検査キット',
+    summary: 'NPO ヘルスケアネットワーク (OCHIS) 個人申込',
+    cost: '¥8,800',
     spec: {
-      must: [
-        '自宅 1 晩で測定するタイプ',
-        'AHI（無呼吸低呼吸指数）が数値で報告される',
-        '医師判定付き（中等症以上の判定基準があるもの）',
-        '保険外で OK、結果が即時返却'
-      ],
-      why: 'Apple Watch Series 7 は SAS 検出未対応、Series 9+ の睡眠時無呼吸検出機能がない。父軌道（糖尿病・心血管）の独立リスク因子（[ADR-013](DECISIONS.md)）。',
-      primaryLink: {
-        label: 'Google: 郵送 SAS 検査キット',
-        url: 'https://www.google.com/search?q=%E9%83%B5%E9%80%81+SAS+%E6%A4%9C%E6%9F%BB%E3%82%AD%E3%83%83%E3%83%88+AHI'
+      pick: {
+        source: 'service',
+        productName: 'NPO ヘルスケアネットワーク (OCHIS) 個人申込・自費 SAS スクリーニング検査',
+        price: '¥8,800（パルスオキシメータ貸与 3 日、AHI 報告付き、医師判定あり）',
+        url: 'https://sas.ochis-net.jp/request_person/',
+        note: 'オンラインで申込 → 銀行振込 → 機器郵送 → 自宅 1 晩装着 → 返送 → 約 2 週間で結果（AHI 数値 + 医師判定）。AHI ≥ 15（中等症以上）なら呼吸器内科紹介。'
       },
+      must: [
+        '個人申込・自費可',
+        'AHI（無呼吸低呼吸指数）数値報告',
+        '医師判定付き',
+        '中等症以上の場合の次のステップ案内あり'
+      ],
+      why: 'Apple Watch Series 7 は SAS 検出未対応。父軌道（糖尿病・心血管）の独立リスク因子（[ADR-013](DECISIONS.md)）。OCHIS は個人がオンラインで自費申込できる数少ない窓口。',
       altLinks: [
         {
-          label: 'スマートスリープ（簡易検査キット）',
-          url: 'https://www.google.com/search?q=%E3%82%B9%E3%83%9E%E3%83%BC%E3%83%88%E3%82%B9%E3%83%AA%E3%83%BC%E3%83%97+SAS%E6%A4%9C%E6%9F%BB%E3%82%AD%E3%83%83%E3%83%88'
-        },
-        {
-          label: 'ResMed 自宅検査',
-          url: 'https://www.google.com/search?q=ResMed+%E8%87%AA%E5%AE%85%E6%A4%9C%E6%9F%BB+%E7%9D%A1%E7%9C%A0%E6%99%82%E7%84%A1%E5%91%BC%E5%90%B8'
+          label: '次点: 一般財団法人 運輸・交通 SAS 対策支援センター',
+          url: 'https://www.sas-support.or.jp/application/form2/'
         }
       ],
       avoid: [
         'いびき録音アプリ単体（医学的閾値判定不可）',
-        'AHI が報告されないキット（中等症以上の判定不可）',
-        '医師判定なしの自分で読むタイプのみ（次のステップが不明確）'
+        'AHI が報告されないキット',
+        '医師判定なしの自分で読むタイプのみ'
       ],
       verify: [
-        'AHI（無呼吸低呼吸指数）が数値で報告される明記',
-        '結果到着までの日数が 2-3 週間以内',
-        '中等症（AHI ≥ 15）以上の場合の次の動き（呼吸器内科紹介等）が案内される'
+        '申込確認メールが届く',
+        '機器到着 → 装着方法ガイド付き',
+        '結果報告書に AHI 数値と判定（正常 / 軽症 / 中等症 / 重症）が明記'
       ]
     }
   },
@@ -483,36 +514,38 @@ export const PREP_ITEMS: PrepItem[] = [
     id: 'med-dexa',
     group: 'medical',
     title: 'DEXA スキャン 3 回予約',
-    summary: 'Day 0 / Month 6 / Month 12、同一施設固定',
+    summary: 'メディカルスキャニング 大宮、同一機種固定',
     cost: '¥24,000-45,000（3 回計）',
     spec: {
+      pick: {
+        source: 'service',
+        productName: 'メディカルスキャニング 大宮（DEXA 全身骨密度・体組成）',
+        price: '¥8,000-15,000 × 3 回 = ¥24,000-45,000',
+        url: 'https://www.medicalscanning.net/list/?gid=8',
+        note: '電話予約時に「Day 0 / Month 6 / Month 12 の 3 回連続予約、同一機種・同一時間帯（午前固定）」を依頼。機種差で値ブレるため必ず同一施設固定（[ADR-023](DECISIONS.md)）。'
+      },
       must: [
         '同一施設・同一機種・同一時間帯（午前固定）3 回',
-        'DEXA 全身スキャン（骨密度 + 体組成）対応',
-        '浦和近隣で通いやすい施設',
-        '予約時に「3 回連続予約」が可能',
-        '体重 110 kg 以上の患者対応の機種'
+        'DEXA 全身（骨密度 + 体組成）',
+        '体重 110 kg 以上の患者対応機種',
+        '3 回連続予約が可能'
       ],
-      why: 'DEXA は機種差が大きく、別施設・別機種で測ると体組成・LBM の数値がブレる（[ADR-023](DECISIONS.md)）。3 回予約を一度に押さえる。',
-      primaryLink: {
-        label: 'メディカルスキャニング 大宮（DEXA）',
-        url: 'https://www.google.com/search?q=%E3%83%A1%E3%83%87%E3%82%A3%E3%82%AB%E3%83%AB%E3%82%B9%E3%82%AD%E3%83%A3%E3%83%8B%E3%83%B3%E3%82%B0+%E5%A4%A7%E5%AE%AE+DEXA'
-      },
+      why: 'DEXA は機種差が大きく、別施設・別機種だと体組成・LBM の数値がブレる（[ADR-023](DECISIONS.md)）。3 回分を一度に押さえる。',
       altLinks: [
         {
-          label: 'Google: 浦和 DEXA 全身',
+          label: '次点候補: 浦和近隣 DEXA 検索',
           url: 'https://www.google.com/search?q=%E6%B5%A6%E5%92%8C+DEXA+%E5%85%A8%E8%BA%AB+%E4%BD%93%E7%B5%84%E6%88%90'
         }
       ],
       avoid: [
-        '別施設で複数回（測定値がブレ、ADR-023 違反）',
-        '体組成のみ・骨密度なし機種（DEXA 全身でない）',
-        'InBody 等の生体インピーダンス（DEXA とは別物、代替不可）',
+        '別施設で複数回（測定値がブレる）',
+        '体組成のみ・骨密度なし機種',
+        'InBody 等の生体インピーダンス（DEXA とは別物）',
         '時間帯がバラバラ（食事・水分摂取で数値ブレ）'
       ],
       verify: [
         '3 回分の予約番号 / 日時が手元にある',
-        '同一施設・同一機種が確約されている',
+        '同一機種が確約されている',
         'すべて午前帯（朝食抜き条件で統一）'
       ]
     }
@@ -520,32 +553,35 @@ export const PREP_ITEMS: PrepItem[] = [
   {
     id: 'med-blood',
     group: 'medical',
-    title: '近隣内科で血液検査 + 腹部エコー予約',
+    title: '近隣内科で血液検査 + 腹部エコー',
     summary: '本太・原山エリアでかかりつけ確立',
     cost: '保険適用',
     spec: {
-      must: [
-        '必須項目: HbA1c / 空腹時血糖 / LDL / HDL / 中性脂肪 / AST / ALT / γ-GTP / 尿酸 / TSH / Cre / eGFR',
-        '腹部エコー（NAFLD 評価）',
-        '本太 / 原山エリアの内科',
-        'かかりつけ医として継続通院しやすい立地と曜日',
-        '初回予約時に検査項目を電話で読み上げて確認'
-      ],
-      why: '父軌道（糖尿病 → 肝腎 → がん）の早期発見。健康診断の標準項目だけでは NAFLD と HOMA-IR が不足。詳細は [docs/06-reviews.md H-2a](docs/06-reviews.md)。',
-      primaryLink: {
-        label: 'Google マップ: 本太・原山 内科',
-        url: 'https://www.google.com/maps/search/?api=1&query=%E6%9C%AC%E5%A4%AA+%E5%8E%9F%E5%B1%B1+%E5%86%85%E7%A7%91'
+      pick: {
+        source: 'service',
+        productName: '本太・原山エリアの内科（Google マップで検索）',
+        price: '保険適用（3 割負担で約 ¥3,000-5,000）',
+        url: 'https://www.google.com/maps/search/?api=1&query=%E6%9C%AC%E5%A4%AA+%E5%8E%9F%E5%B1%B1+%E5%86%85%E7%A7%91',
+        note: '電話予約時に必須項目を全部読み上げて対応可能か確認。朝食抜きの指示と予約時刻を確定。結果説明の再来院日も同時予約。'
       },
+      must: [
+        'HbA1c / 空腹時血糖 / LDL / HDL / 中性脂肪',
+        'AST / ALT / γ-GTP / 尿酸',
+        'TSH / Cre / eGFR',
+        '腹部エコー（NAFLD 評価）',
+        '本太 / 原山エリアで通院しやすい立地と曜日'
+      ],
+      why: '父軌道（糖尿病 → 肝腎 → がん）の早期発見。健康診断パッケージだけだと NAFLD と HOMA-IR が不足。詳細は [docs/06-reviews.md H-2a](docs/06-reviews.md)。',
       avoid: [
         '健康診断パッケージ任せ（指定項目が抜ける）',
         '血液検査だけで腹部エコー省略（NAFLD 見逃し）',
-        '通院しにくい遠方（継続性が落ちる）',
-        '初回で詳細項目をリクエストできない医院（柔軟性が低い）'
+        '通院しにくい遠方',
+        '初回で詳細項目をリクエストできない医院'
       ],
       verify: [
-        '電話予約時に必須項目を全部読み上げて、対応可能か確認',
-        '朝食抜き条件と予約時刻が指示される',
-        '結果説明の再来院日も同時に予約',
+        '電話予約時に必須項目を全部読み上げて確認',
+        '朝食抜きと予約時刻が指示される',
+        '結果説明の再来院日も同時予約',
         '次回以降の継続通院がしやすい雰囲気'
       ]
     }
