@@ -111,7 +111,7 @@
     </ul>
     {#if $phase.stage === 'prep'}
       <p class="prep-progress">
-        準備チェックリスト: {prepCompletedIds.size} / 21 項目
+        準備チェックリスト: {prepCompletedIds.size} / 20 項目
       </p>
     {/if}
   </section>
