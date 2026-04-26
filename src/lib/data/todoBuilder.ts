@@ -1,6 +1,6 @@
 import type { Stage } from '../stores/phase';
 import type { RestAssessment } from '../judgment/restTrigger';
-import { PREP_ITEMS, PREP_GROUPS, type PrepItem } from './preparation';
+import { PREP_ITEMS, type PrepItem } from './preparation';
 
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -23,9 +23,7 @@ export type TodoKind =
   | 'weekly-review'
   | 'prep-item'
   | 'prep-ready'
-  | 'lab-day0'
-  | 'lab-month6'
-  | 'lab-month12';
+  | 'prep-weigh-optional';
 
 export interface TodoItem {
   id: string;
@@ -52,83 +50,60 @@ export interface BuildContext {
   dow: DayOfWeek;
   rest: RestAssessment;
   prepCompletedIds: Set<string>;
-  daysSincePlanStart: number;
-  hasDay0Lab: boolean;
-  hasMonth6Lab: boolean;
-  hasMonth12Lab: boolean;
 }
 
 export function buildTodos(ctx: BuildContext): TodoItem[] {
   if (ctx.stage === 'prep') {
     return buildPrepTodos(ctx);
   }
-  if (ctx.stage === '0a') {
-    return [
-      {
-        id: 'rest-0a',
-        kind: 'rest',
-        startMin: null,
-        endMin: null,
-        title: '今日は何もしなくていい',
-        detail: '葬儀後の 14 日間。体重測定も運動もなし。眠れたら眠る、食べられたら食べる。'
-      }
-    ];
-  }
-  if (ctx.stage === '0b') {
-    return [
-      {
-        id: 'weigh-0b',
-        kind: 'weigh',
-        startMin: m(7, 0),
-        endMin: m(7, 5),
-        title: '7:00 体重計に乗る',
-        detail: '起床直後トイレ後、Eufy が Apple Health に自動送信。',
-        cta: { label: 'Apple Health', url: APPLE_HEALTH_URL }
-      },
-      {
-        id: 'walk-0b',
-        kind: 'walking',
-        startMin: null,
-        endMin: null,
-        title: '気が向いたら散歩 15-20 分',
-        detail: '時間帯自由。できなくても大丈夫。',
-        durationMin: 18
-      }
-    ];
-  }
-
   return buildOperationalTodos(ctx);
 }
 
 function buildPrepTodos(ctx: BuildContext): TodoItem[] {
   const remaining = PREP_ITEMS.filter((it) => !ctx.prepCompletedIds.has(it.id));
+  const items: TodoItem[] = [];
+
+  // 気が向いたら体重計に乗る（任意、prep でも自動検出は走る）
+  items.push({
+    id: 'prep-weigh',
+    kind: 'prep-weigh-optional',
+    startMin: null,
+    endMin: null,
+    title: '気が向いたら体重計に乗る',
+    detail: '無理しなくて OK。乗ったら自動記録される。',
+    cta: { label: 'Apple Health', url: APPLE_HEALTH_URL }
+  });
+
   if (remaining.length === 0) {
-    return [
-      {
-        id: 'prep-ready',
-        kind: 'prep-ready',
-        startMin: null,
-        endMin: null,
-        title: '準備が整いました。今日から始められます。',
-        detail: '「今日から始める」ボタンを押すと Stage 0a（着地期 14 日）が始まります。'
-      }
-    ];
+    items.push({
+      id: 'prep-ready',
+      kind: 'prep-ready',
+      startMin: null,
+      endMin: null,
+      title: '準備が整いました。Phase 1 を始められます。',
+      detail: '「次のフェーズへ進む」を押すと Phase 1（ランプアップ）が始まります。'
+    });
+    return items;
   }
+
   const groupOrder: Record<string, number> = { tools: 0, medical: 1, app: 2, environment: 3 };
   const sorted = [...remaining].sort(
     (a, b) => (groupOrder[a.group] ?? 9) - (groupOrder[b.group] ?? 9)
   );
   const top = sorted.slice(0, 3);
-  return top.map((item) => ({
-    id: `prep-${item.id}`,
-    kind: 'prep-item',
-    startMin: null,
-    endMin: null,
-    title: item.title,
-    detail: item.detail,
-    prepItem: item,
-    cta: item.link ? { label: item.link.label, url: item.link.url } : undefined
-  }));
+  for (const item of top) {
+    items.push({
+      id: `prep-${item.id}`,
+      kind: 'prep-item',
+      startMin: null,
+      endMin: null,
+      title: item.title,
+      detail: item.detail,
+      prepItem: item,
+      cta: item.link ? { label: item.link.label, url: item.link.url } : undefined
+    });
+  }
+  return items;
 }
 
 function buildOperationalTodos(ctx: BuildContext): TodoItem[] {
@@ -236,8 +211,6 @@ function buildOperationalTodos(ctx: BuildContext): TodoItem[] {
       cta: { label: 'Apple Health', url: APPLE_HEALTH_URL }
     });
   }
-
-  injectLabReminders(items, ctx);
 
   return items.sort((a, b) => {
     const aStart = a.startMin ?? 99999;
@@ -349,36 +322,3 @@ function addWeekdayWorkout(
   }
 }
 
-function injectLabReminders(items: TodoItem[], ctx: BuildContext) {
-  const d = ctx.daysSincePlanStart;
-  if (d === 0 && !ctx.hasDay0Lab) {
-    items.push({
-      id: 'lab-day0',
-      kind: 'lab-day0',
-      startMin: m(8, 0),
-      endMin: m(8, 1),
-      title: 'Day 0 セットアップ + 検査結果入力',
-      detail: 'DEXA / 詳細血液 / 家庭血圧 1 週間 / SAS キット申込'
-    });
-  }
-  if (d >= 175 && d <= 185 && !ctx.hasMonth6Lab) {
-    items.push({
-      id: 'lab-month6',
-      kind: 'lab-month6',
-      startMin: m(8, 0),
-      endMin: m(8, 1),
-      title: 'Month 6 DEXA 結果を入力',
-      detail: '同一施設・同一機種で 2 回目'
-    });
-  }
-  if (d >= 360 && d <= 370 && !ctx.hasMonth12Lab) {
-    items.push({
-      id: 'lab-month12',
-      kind: 'lab-month12',
-      startMin: m(8, 0),
-      endMin: m(8, 1),
-      title: 'Month 12 DEXA 結果を入力',
-      detail: '3 回目、Sweet Spot ロードマップへの分岐判定'
-    });
-  }
-}

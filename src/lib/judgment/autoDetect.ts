@@ -10,6 +10,7 @@ export function detectDone(item: TodoItem, today: HealthSnapshot | null): Detect
   if (!today) return { done: false };
   switch (item.kind) {
     case 'weigh':
+    case 'prep-weigh-optional':
       if (typeof today.weightKg === 'number') {
         return { done: true, valueText: `${today.weightKg.toFixed(1)} kg` };
       }
@@ -61,6 +62,7 @@ export function detectDone(item: TodoItem, today: HealthSnapshot | null): Detect
 export function isDetectableKind(kind: TodoKind): boolean {
   return [
     'weigh',
+    'prep-weigh-optional',
     'walking',
     'strength',
     'cooldown',

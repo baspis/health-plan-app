@@ -8,6 +8,12 @@ const POOL: Partial<Record<TodoKind, string[]>> = {
     'ナイス習慣',
     '今日も一歩'
   ],
+  'prep-weigh-optional': [
+    '気が向いたんだね',
+    '記録できた、嬉しい',
+    'ナイス',
+    'ありがとう、自分'
+  ],
   walking: [
     'お疲れさま',
     '今日もいいペース',
