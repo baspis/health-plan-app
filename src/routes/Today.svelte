@@ -1,303 +1,266 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { clock } from '../lib/stores/clock';
-  import { phase, STAGE_META, daysSinceStageStart } from '../lib/stores/phase';
+  import { phase, daysSincePlanStart, startFromPrep } from '../lib/stores/phase';
   import { health, refreshHealth } from '../lib/stores/health';
-  import { getDayTimeline, type TimeSlot } from '../lib/data/plan';
+  import { db, type LabResult } from '../lib/db/db';
+  import { buildTodos, type TodoItem, type DayOfWeek } from '../lib/data/todoBuilder';
+  import { detectDone } from '../lib/judgment/autoDetect';
+  import { pickPraise } from '../lib/data/praise';
   import { assessRest } from '../lib/judgment/restTrigger';
-  import { detectAnomalies, logAnomalies, getRecentNotifications } from '../lib/notify/anomaly';
-  import { ensureNotificationPermission, fireLocalNotification } from '../lib/notify/local';
-  import type { NotificationLog } from '../lib/db/db';
-  import PrepChecklist from '../lib/components/PrepChecklist.svelte';
+  import PhaseHeader from '../lib/components/PhaseHeader.svelte';
+  import TodoItemView from '../lib/components/TodoItem.svelte';
+  import LabModal from '../lib/components/LabModal.svelte';
 
-  let notifications = $state<NotificationLog[]>([]);
-  let notifPermission = $state<NotificationPermission>('default');
+  let prepCompletedIds = $state<Set<string>>(new Set());
+  let labs = $state<LabResult[]>([]);
+  let labModalMs = $state<'day0' | 'month6' | 'month12' | null>(null);
 
   onMount(async () => {
-    if ($phase.stage === 'prep') return;
     await refreshHealth();
-    const signals = detectAnomalies($health);
-    if (signals.length > 0) {
-      await logAnomalies(signals);
-      if (notifPermission === 'granted') {
-        for (const s of signals) fireLocalNotification(s);
-      }
-    }
-    notifications = await getRecentNotifications(3);
-    notifPermission = typeof Notification !== 'undefined' ? Notification.permission : 'denied';
+    const rows = await db.prepProgress.toArray();
+    prepCompletedIds = new Set(rows.map((r) => r.itemId));
+    labs = await db.labResults.toArray();
   });
 
-  async function enableNotifications() {
-    notifPermission = await ensureNotificationPermission();
+  function todayISO(d: Date = new Date()): string {
+    const tz = d.getTimezoneOffset() * 60_000;
+    return new Date(d.getTime() - tz).toISOString().slice(0, 10);
   }
 
   const now = $derived($clock);
-  const dow = $derived(now.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6);
+  const dow = $derived(now.getDay() as DayOfWeek);
   const nowMin = $derived(now.getHours() * 60 + now.getMinutes());
-  const timeline = $derived(getDayTimeline(dow, $phase.stage));
-  const stageMeta = $derived(STAGE_META[$phase.stage]);
+  const todayKey = $derived(todayISO(now));
+  const restAssessment = $derived(assessRest($health));
+  const dayPlan = $derived(daysSincePlanStart($phase, now));
 
-  const currentSlot = $derived<TimeSlot | null>(
-    timeline.find((s) => nowMin >= s.startMin && nowMin < s.endMin) ?? null
+  const hasDay0Lab = $derived(labs.some((l) => l.milestone === 'day0'));
+  const hasMonth6Lab = $derived(labs.some((l) => l.milestone === 'month6'));
+  const hasMonth12Lab = $derived(labs.some((l) => l.milestone === 'month12'));
+
+  const todos = $derived(
+    buildTodos({
+      stage: $phase.stage,
+      dow,
+      rest: restAssessment,
+      prepCompletedIds,
+      daysSincePlanStart: dayPlan,
+      hasDay0Lab,
+      hasMonth6Lab,
+      hasMonth12Lab
+    })
   );
 
-  const nextSlot = $derived<TimeSlot | null>(
-    timeline.find((s) => s.startMin >= nowMin) ?? null
+  const todaySnapshot = $derived(
+    $health.latest && $health.latest.dateISO === todayKey ? $health.latest : null
   );
 
-  const primarySlot = $derived<TimeSlot | null>(currentSlot ?? nextSlot);
-  const rest = $derived(assessRest($health));
-
-  const DOW_JP = ['日', '月', '火', '水', '木', '金', '土'];
-  const dowJp = $derived(DOW_JP[dow]);
-  const hours = $derived(String(now.getHours()).padStart(2, '0'));
-  const minutes = $derived(String(now.getMinutes()).padStart(2, '0'));
-
-  function formatTime(slot: TimeSlot | null): string {
-    if (!slot) return '';
-    const h = Math.floor(slot.startMin / 60);
-    const m = slot.startMin % 60;
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  function positionOf(item: TodoItem): 'past' | 'now' | 'future' | 'flow' {
+    if (item.startMin === null) return 'flow';
+    if (item.endMin !== null && nowMin >= item.startMin && nowMin < item.endMin) return 'now';
+    if (nowMin >= (item.endMin ?? item.startMin)) return 'past';
+    return 'future';
   }
 
-  function openCta(url: string) {
-    try {
-      window.location.href = url;
-    } catch (e) {
-      console.error(e);
+  const allPrepDone = $derived(
+    $phase.stage === 'prep' && todos.length === 1 && todos[0].kind === 'prep-ready'
+  );
+  let confirmingStart = $state(false);
+
+  async function onItemClick(item: TodoItem) {
+    if (item.kind === 'prep-item' && item.prepItem) {
+      const id = item.prepItem.id;
+      if (prepCompletedIds.has(id)) {
+        await db.prepProgress.delete(id);
+        prepCompletedIds.delete(id);
+      } else {
+        await db.prepProgress.put({ itemId: id, completedAt: Date.now() });
+        prepCompletedIds.add(id);
+      }
+      prepCompletedIds = new Set(prepCompletedIds);
+      return;
     }
+    if (item.kind === 'prep-ready') {
+      confirmingStart = true;
+      return;
+    }
+    if (item.kind === 'lab-day0') labModalMs = 'day0';
+    if (item.kind === 'lab-month6') labModalMs = 'month6';
+    if (item.kind === 'lab-month12') labModalMs = 'month12';
+  }
+
+  function confirmStart() {
+    startFromPrep();
+    confirmingStart = false;
+  }
+
+  function cancelStart() {
+    confirmingStart = false;
+  }
+
+  async function closeLabModal() {
+    labModalMs = null;
+    labs = await db.labResults.toArray();
   }
 </script>
 
-{#if $phase.stage === 'prep'}
-  <PrepChecklist />
-{:else}
-<div class="today">
-  <div class="time-row">
-    <span class="now-time num">{hours}:{minutes}</span>
-    <span class="now-dow">{dowJp}曜日</span>
-  </div>
+<div class="page">
+  <PhaseHeader />
 
-  <div class="rest-badge-row">
-    <span class="pill pill-{rest.level === 'normal' ? 'ok' : rest.level === 'level2' ? 'warn' : 'danger'}">
-      {rest.badge}
-    </span>
-    {#if rest.reasons.length > 0}
-      <span class="rest-reason">{rest.reasons.join(' / ')}</span>
-    {/if}
-  </div>
-
-  {#if primarySlot}
-    <div class="hero card card-lifted">
-      <div class="hero-label">
-        {currentSlot ? 'いま' : `つぎは ${formatTime(primarySlot)}`}
-      </div>
-      <h1 class="hero-title">{primarySlot.action.title}</h1>
-      {#if primarySlot.action.subtitle}
-        <p class="hero-sub">{primarySlot.action.subtitle}</p>
-      {/if}
-      {#if primarySlot.action.cta && rest.level !== 'level1'}
-        <button class="cta" onclick={() => openCta(primarySlot.action.cta!.url)}>
-          {primarySlot.action.cta.label} を開く
-        </button>
-      {/if}
-    </div>
-  {:else}
-    <div class="hero card">
-      <div class="hero-label">今日</div>
-      <h1 class="hero-title">{stageMeta.jp}</h1>
-      <p class="hero-sub">{stageMeta.description}</p>
+  {#if restAssessment.level !== 'normal'}
+    <div class="rest-note pill pill-warn">
+      {restAssessment.badge} · {restAssessment.reasons.join(' / ') || ''}
     </div>
   {/if}
 
-  {#if nextSlot && nextSlot !== primarySlot}
-    <div class="next card">
-      <span class="next-label">次</span>
-      <span class="next-time num">{formatTime(nextSlot)}</span>
-      <span class="next-action">{nextSlot.action.title}</span>
-    </div>
+  <ul class="list">
+    {#each todos as item (item.id)}
+      {@const detected = detectDone(item, todaySnapshot)}
+      {@const praise = detected.done ? pickPraise(item.kind, todayKey) : undefined}
+      <li>
+        <TodoItemView
+          {item}
+          position={positionOf(item)}
+          {detected}
+          praiseText={praise}
+          onItemClick={onItemClick}
+        />
+      </li>
+    {/each}
+  </ul>
+
+  {#if $phase.stage === 'prep' && !allPrepDone}
+    <p class="prep-progress">
+      準備 {prepCompletedIds.size} / 19 項目完了
+    </p>
   {/if}
 
-  {#if notifications.length > 0}
-    <section class="notifs">
-      <h3 class="section-title">最近の通知</h3>
-      {#each notifications as notif (notif.id)}
-        <div class="notif card pill-{notif.severity === 'alert' ? 'danger' : notif.severity === 'warn' ? 'warn' : 'ok'}">
-          <span class="notif-date num">{notif.dateISO}</span>
-          <p class="notif-msg">{notif.message}</p>
-        </div>
-      {/each}
-    </section>
-  {/if}
-
-  {#if notifPermission === 'default'}
-    <section class="perm-prompt card">
-      <p class="perm-msg">
-        異常検知（体重 2 週間上昇・睡眠連続不足・HRV 急低下）を iOS 通知で受け取りますか?
-      </p>
-      <button class="perm-btn" onclick={enableNotifications}>通知を許可</button>
-    </section>
+  {#if allPrepDone}
+    <button class="start-btn" onclick={() => (confirmingStart = true)}>
+      今日から始める
+    </button>
   {/if}
 
   <footer class="north-star">
     80 歳まで息子と歩き、孫を抱き、妻と旅に出られる体と心
   </footer>
 </div>
+
+{#if confirmingStart}
+  <div class="backdrop" onclick={cancelStart} role="presentation">
+    <div
+      class="modal card card-lifted"
+      onclick={(e) => e.stopPropagation()}
+      role="dialog"
+      aria-modal="true"
+      tabindex="-1"
+    >
+      <h3 class="m-title">本当に今日から始めますか?</h3>
+      <p class="m-msg">
+        押すと <strong>Stage 0a（着地期 14 日）</strong> が今日から始まります。
+        以降は段階ゲートに沿って進みます。
+      </p>
+      <div class="m-actions">
+        <button class="m-btn cancel" onclick={cancelStart}>もう少し待つ</button>
+        <button class="m-btn confirm" onclick={confirmStart}>はい、始める</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+{#if labModalMs}
+  <LabModal milestone={labModalMs} onClose={closeLabModal} />
 {/if}
 
 <style>
-  .today {
+  .page {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 8px 0;
+    gap: 14px;
   }
-  .time-row {
+  .rest-note {
+    align-self: flex-start;
+  }
+  .list {
     display: flex;
-    align-items: baseline;
-    gap: 10px;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
   }
-  .now-time {
-    font-size: 36px;
-    font-weight: 700;
-    color: var(--ink);
-    line-height: 1;
-  }
-  .now-dow {
-    font-size: 14px;
-    color: var(--ink-muted);
-    font-weight: 500;
-  }
-  .rest-badge-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .rest-reason {
+  .prep-progress {
+    text-align: center;
     font-size: 12px;
     color: var(--ink-muted);
-  }
-  .hero {
-    padding: 26px 24px;
-  }
-  .hero-label {
-    display: inline-block;
-    padding: 4px 12px;
-    background: var(--accent-light);
-    color: var(--accent-dark);
-    border-radius: var(--rounded-pill);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    margin-bottom: 14px;
-  }
-  .hero-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 10px;
-    line-height: 1.35;
-  }
-  .hero-sub {
-    font-size: 14px;
-    color: var(--ink-dim);
-    line-height: 1.6;
-    margin-bottom: 18px;
-  }
-  .cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--ink);
-    color: var(--bg);
-    padding: 12px 22px;
-    border-radius: var(--rounded-pill);
     font-weight: 600;
-    font-size: 14px;
+    margin-top: 6px;
+  }
+  .start-btn {
+    align-self: stretch;
+    margin-top: 4px;
+    padding: 16px 22px;
+    border-radius: var(--rounded-pill);
+    background: var(--coral);
+    color: var(--bg-elevated);
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: var(--card-shadow-lifted);
     transition: transform var(--anim-fast) var(--ease-smooth);
   }
-  .cta:active {
-    transform: scale(0.97);
-  }
-  .next {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-  }
-  .next-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--ink-muted);
-    letter-spacing: 0.08em;
-  }
-  .next-time {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--ink);
-    min-width: 52px;
-  }
-  .next-action {
-    font-size: 13px;
-    color: var(--ink-dim);
-    flex: 1;
-  }
-  .notifs {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 8px;
-  }
-  .section-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--ink-muted);
-    letter-spacing: 0.06em;
-    margin-bottom: 4px;
-  }
-  .notif {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 14px 16px;
-  }
-  .notif-date {
-    font-size: 11px;
-    font-weight: 600;
-    opacity: 0.75;
-  }
-  .notif-msg {
-    font-size: 13px;
-    line-height: 1.55;
+  .start-btn:active {
+    transform: scale(0.98);
   }
   .north-star {
     text-align: center;
     font-size: 11px;
     color: var(--ink-subtle);
-    padding: 24px 16px 0;
-    letter-spacing: 0.03em;
-    line-height: 1.6;
+    padding: 24px 12px 8px;
+    line-height: 1.7;
+    letter-spacing: 0.02em;
   }
-  .perm-prompt {
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(61, 46, 32, 0.45);
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 100;
+  }
+  .modal {
+    max-width: 360px;
+    padding: 24px;
+  }
+  .m-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .m-msg {
+    font-size: 13px;
+    color: var(--ink-dim);
+    line-height: 1.65;
+    margin-bottom: 20px;
+  }
+  .m-actions {
+    display: flex;
     gap: 10px;
-    padding: 14px 18px;
-    background: var(--accent-light);
+    justify-content: flex-end;
   }
-  .perm-msg {
-    font-size: 12px;
-    color: var(--accent-dark);
-    line-height: 1.6;
-  }
-  .perm-btn {
-    align-self: flex-start;
-    background: var(--accent-dark);
-    color: var(--bg-elevated);
-    padding: 8px 18px;
+  .m-btn {
+    padding: 10px 18px;
     border-radius: var(--rounded-pill);
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .m-btn.cancel {
+    background: var(--bg);
+    color: var(--ink-muted);
+  }
+  .m-btn.confirm {
+    background: var(--coral);
+    color: var(--bg-elevated);
   }
 </style>

@@ -1,27 +1,30 @@
 :root {
-  --bg: #FAF8F4;
+  --bg: #FFF8EE;
   --bg-elevated: #FFFFFF;
-  --card-shadow: 0 2px 8px rgba(27, 43, 74, 0.06), 0 1px 3px rgba(27, 43, 74, 0.04);
-  --card-shadow-lifted: 0 8px 24px rgba(27, 43, 74, 0.12), 0 4px 8px rgba(27, 43, 74, 0.06);
+  --bg-soft: #FFF1D6;
+  --card-shadow: 0 1px 2px rgba(196, 134, 12, 0.05), 0 4px 14px rgba(196, 134, 12, 0.06);
+  --card-shadow-lifted: 0 8px 24px rgba(196, 134, 12, 0.16), 0 2px 6px rgba(196, 134, 12, 0.08);
 
-  --ink: #1B2B4A;
-  --ink-dim: #47526C;
-  --ink-muted: #6B7280;
-  --ink-subtle: #9CA3AF;
+  --ink: #3D2E20;
+  --ink-dim: #6B5642;
+  --ink-muted: #9C8773;
+  --ink-subtle: #C2AD96;
 
-  --accent: #C8872E;
-  --accent-light: #F5E5C8;
-  --accent-dark: #8F5E16;
+  --accent: #E8A93D;
+  --accent-light: #FFF1D6;
+  --accent-dark: #C4860C;
+  --coral: #E67A5C;
+  --coral-light: #FCE2D8;
 
-  --ok: #2F6B47;
-  --warn: #B86E1A;
-  --danger: #A8321F;
-  --danger-light: #F9E0DA;
+  --ok: #6BAA75;
+  --ok-light: #E1F0DF;
+  --warn: #D88A2E;
 
-  --divider: #E8E2D6;
+  --divider: #F0E5D0;
+  --divider-soft: #F8EFDD;
 
-  --rounded: 20px;
-  --rounded-sm: 12px;
+  --rounded: 22px;
+  --rounded-sm: 14px;
   --rounded-pill: 999px;
 
   --font-body: "Inter", "Noto Sans JP", system-ui, sans-serif;
@@ -35,23 +38,8 @@
   --anim-slow: 400ms;
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0F1626;
-    --bg-elevated: #18223A;
-    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
-    --card-shadow-lifted: 0 8px 24px rgba(0, 0, 0, 0.5);
-    --ink: #F0EADC;
-    --ink-dim: #C8C3B5;
-    --ink-muted: #8E96A8;
-    --ink-subtle: #5A6278;
-    --accent: #E09E42;
-    --accent-light: #3A2A10;
-    --accent-dark: #F5C378;
-    --divider: #253048;
-  }
+  color-scheme: light;
 }
 
 * {
@@ -77,6 +65,11 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   touch-action: pan-y;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(232, 169, 61, 0.18), transparent 55%),
+    radial-gradient(circle at 110% 8%, rgba(230, 122, 92, 0.12), transparent 50%),
+    var(--bg);
+  background-attachment: fixed;
 }
 
 #app {
@@ -85,7 +78,7 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   position: relative;
-  padding: calc(env(safe-area-inset-top, 0) + 8px) 0 calc(env(safe-area-inset-bottom, 0) + 72px);
+  padding: calc(env(safe-area-inset-top, 0) + 12px) 18px calc(env(safe-area-inset-bottom, 0) + 24px);
 }
 
 button {
@@ -98,7 +91,7 @@ button {
 }
 
 a {
-  color: var(--accent);
+  color: var(--accent-dark);
   text-decoration: none;
   font-weight: 600;
 }
@@ -125,7 +118,7 @@ h1, h2, h3, h4 {
 .card {
   background: var(--bg-elevated);
   border-radius: var(--rounded);
-  padding: 22px;
+  padding: 18px 20px;
   box-shadow: var(--card-shadow);
   transition: box-shadow var(--anim-normal) var(--ease-smooth);
 }
@@ -141,21 +134,21 @@ h1, h2, h3, h4 {
   padding: 4px 12px;
   border-radius: var(--rounded-pill);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 .pill-ok {
-  background: rgba(47, 107, 71, 0.12);
+  background: var(--ok-light);
   color: var(--ok);
 }
 .pill-warn {
-  background: rgba(184, 110, 26, 0.12);
-  color: var(--warn);
+  background: var(--coral-light);
+  color: var(--coral);
 }
-.pill-danger {
-  background: var(--danger-light);
-  color: var(--danger);
+.pill-accent {
+  background: var(--accent-light);
+  color: var(--accent-dark);
 }
 .pill-neutral {
   background: var(--divider);

@@ -28,23 +28,6 @@ export interface LabResult {
   enteredAt: number;
 }
 
-export interface ModeLogEntry {
-  id?: number;
-  dateISO: string;
-  mode: 'normal' | 'low-energy' | 'grief';
-  source: 'auto' | 'manual';
-  reason?: string;
-}
-
-export interface NotificationLog {
-  id?: number;
-  dateISO: string;
-  kind: 'weight-up' | 'sleep-short' | 'hrv-drop' | 'workout-low' | 'stage-gate' | 'lbm-warn';
-  severity: 'info' | 'warn' | 'alert';
-  message: string;
-  dismissedAt?: number;
-}
-
 export interface PrepProgress {
   itemId: string;
   completedAt: number;
@@ -54,8 +37,6 @@ export interface PrepProgress {
 class DohyoDB extends Dexie {
   healthSnapshots!: Table<HealthSnapshot, string>;
   labResults!: Table<LabResult, number>;
-  modeLog!: Table<ModeLogEntry, number>;
-  notifications!: Table<NotificationLog, number>;
   prepProgress!: Table<PrepProgress, string>;
 
   constructor() {
@@ -72,6 +53,13 @@ class DohyoDB extends Dexie {
       modeLog: '++id, dateISO, mode',
       notifications: '++id, dateISO, kind, severity',
       prepProgress: 'itemId, completedAt'
+    });
+    this.version(3).stores({
+      healthSnapshots: 'dateISO, ingestedAt',
+      labResults: '++id, kind, dateISO, milestone',
+      prepProgress: 'itemId, completedAt',
+      modeLog: null,
+      notifications: null
     });
   }
 }
