@@ -14,7 +14,7 @@
   import LabAccess from '../lib/components/LabAccess.svelte';
   import TodoItemView from '../lib/components/TodoItem.svelte';
   import PrepDetailModal from '../lib/components/PrepDetailModal.svelte';
-  import type { PrepItem } from '../lib/data/preparation';
+  import { getRequiredItemIds, type PrepItem } from '../lib/data/preparation';
 
   let prepCompletedIds = $state<Set<string>>(new Set());
   let activePrepItem = $state<PrepItem | null>(null);
@@ -35,6 +35,7 @@
   const nowMin = $derived(now.getHours() * 60 + now.getMinutes());
   const todayKey = $derived(todayISO(now));
   const restAssessment = $derived(assessRest($health));
+  const requiredPrepTotal = getRequiredItemIds().length;
 
   const todos = $derived(
     buildTodos({
@@ -111,7 +112,7 @@
     </ul>
     {#if $phase.stage === 'prep'}
       <p class="prep-progress">
-        準備チェックリスト: {prepCompletedIds.size} / 20 項目
+        準備チェックリスト: {prepCompletedIds.size} / {requiredPrepTotal} 項目
       </p>
     {/if}
   </section>

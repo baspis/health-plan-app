@@ -1,6 +1,6 @@
 import type { Stage } from '../stores/phase';
 import type { RestAssessment } from '../judgment/restTrigger';
-import { PREP_ITEMS, type PrepItem } from './preparation';
+import { PREP_ITEMS, isItemRequired, type PrepItem } from './preparation';
 
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -60,7 +60,9 @@ export function buildTodos(ctx: BuildContext): TodoItem[] {
 }
 
 function buildPrepTodos(ctx: BuildContext): TodoItem[] {
-  const remaining = PREP_ITEMS.filter((it) => !ctx.prepCompletedIds.has(it.id));
+  const remaining = PREP_ITEMS.filter(
+    (it) => isItemRequired(it) && !ctx.prepCompletedIds.has(it.id)
+  );
   const items: TodoItem[] = [];
 
   // 気が向いたら体重計に乗る（任意、prep でも自動検出は走る）

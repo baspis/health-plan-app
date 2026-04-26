@@ -45,8 +45,13 @@
     {/if}
 
     {#if item.spec}
+      <section class="sec sec-purpose">
+        <h3 class="sec-title">目的</h3>
+        <p class="why">{item.spec.purpose}</p>
+      </section>
+
       <section class="sec">
-        <h3 class="sec-title">これを買う / 予約する</h3>
+        <h3 class="sec-title">必須仕様</h3>
         <ul class="must">
           {#each item.spec.must as line}
             <li>{line}</li>
@@ -54,28 +59,43 @@
         </ul>
       </section>
 
+      {#if item.spec.niceToHave && item.spec.niceToHave.length > 0}
+        <section class="sec">
+          <h3 class="sec-title">あると良い</h3>
+          <ul class="must optional">
+            {#each item.spec.niceToHave as line}
+              <li>{line}</li>
+            {/each}
+          </ul>
+        </section>
+      {/if}
+
       <section class="sec sec-why">
         <h3 class="sec-title">なぜこの仕様か</h3>
         <p class="why">{item.spec.why}</p>
       </section>
 
-      {#if item.spec.primaryLink || (item.spec.altLinks && item.spec.altLinks.length > 0)}
+      {#if item.spec.searchLinks && item.spec.searchLinks.length > 0}
         <section class="sec">
-          <h3 class="sec-title">直リンク</h3>
-          {#if item.spec.primaryLink}
-            <button class="link-primary" onclick={() => openLink(item.spec!.primaryLink!.url)}>
-              {item.spec.primaryLink.label} →
-            </button>
-          {/if}
-          {#if item.spec.altLinks}
-            <div class="alt-links">
-              {#each item.spec.altLinks as link}
-                <button class="link-alt" onclick={() => openLink(link.url)}>
-                  {link.label} →
-                </button>
-              {/each}
-            </div>
-          {/if}
+          <h3 class="sec-title">仕様で探す</h3>
+          <div class="alt-links">
+            {#each item.spec.searchLinks as link, i}
+              <button class={i === 0 ? 'link-primary' : 'link-alt'} onclick={() => openLink(link.url)}>
+                {link.label} →
+              </button>
+            {/each}
+          </div>
+        </section>
+      {/if}
+
+      {#if item.spec.examples && item.spec.examples.length > 0}
+        <section class="sec">
+          <h3 class="sec-title">例示（これに限らない）</h3>
+          <ul class="examples">
+            {#each item.spec.examples as line}
+              <li>{line}</li>
+            {/each}
+          </ul>
         </section>
       {/if}
 
@@ -89,9 +109,18 @@
       </section>
 
       <section class="sec">
-        <h3 class="sec-title">届いたら / 予約後に確認</h3>
+        <h3 class="sec-title">買う前 / 予約前に確認</h3>
         <ul class="verify">
-          {#each item.spec.verify as line}
+          {#each item.spec.verifyBeforeBuy as line}
+            <li>{line}</li>
+          {/each}
+        </ul>
+      </section>
+
+      <section class="sec">
+        <h3 class="sec-title">届いたら / 実施後に確認</h3>
+        <ul class="verify">
+          {#each item.spec.verifyAfterReceive as line}
             <li>{line}</li>
           {/each}
         </ul>
@@ -203,7 +232,8 @@
     margin-bottom: 8px;
   }
   .must,
-  .verify {
+  .verify,
+  .examples {
     list-style: none;
     padding: 0;
     display: flex;
@@ -211,7 +241,8 @@
     gap: 6px;
   }
   .must li,
-  .verify li {
+  .verify li,
+  .examples li {
     font-size: 13px;
     color: var(--ink);
     line-height: 1.5;
@@ -225,6 +256,20 @@
     color: var(--accent-dark);
     font-size: 9px;
     top: 5px;
+  }
+  .must.optional li::before {
+    content: '＋';
+    color: var(--ink-muted);
+    top: 1px;
+  }
+  .examples li::before {
+    content: '例';
+    position: absolute;
+    left: 0;
+    color: var(--ink-muted);
+    font-size: 10px;
+    font-weight: 700;
+    top: 1px;
   }
   .verify li::before {
     content: '☐';
