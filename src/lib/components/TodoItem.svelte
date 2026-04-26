@@ -19,6 +19,7 @@
   const detectable = $derived(isDetectableKind(item.kind));
   const showPraise = $derived(detectable && detected.done);
   const isClickable = $derived(item.kind === 'prep-item' || item.kind.startsWith('lab-') || item.kind === 'prep-ready');
+  const showChevron = $derived(item.kind === 'prep-item');
 
   function formatTime(min: number | null): string {
     if (min === null) return '';
@@ -67,6 +68,8 @@
       <h3 class="title">{item.title}</h3>
       {#if showPraise && detected.valueText}
         <span class="value num">{detected.valueText}</span>
+      {:else if showChevron}
+        <span class="chevron">›</span>
       {/if}
     </div>
     {#if item.detail}
@@ -75,7 +78,7 @@
     {#if showPraise && praiseText}
       <p class="praise"><span class="check">✓</span> {praiseText}</p>
     {/if}
-    {#if item.cta && position !== 'past'}
+    {#if item.cta && position !== 'past' && !showChevron}
       <button class="cta" onclick={handleCta}>
         {item.cta.label} を開く →
       </button>
@@ -181,6 +184,17 @@
     font-weight: 700;
     color: var(--ok);
     flex-shrink: 0;
+  }
+  .chevron {
+    font-size: 22px;
+    color: var(--ink-subtle);
+    font-weight: 400;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: -2px;
+  }
+  .todo.done .chevron {
+    color: var(--ok);
   }
   .detail {
     font-size: 12px;

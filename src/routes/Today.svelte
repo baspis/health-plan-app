@@ -13,8 +13,11 @@
   import SettingsMenu from '../lib/components/SettingsMenu.svelte';
   import LabAccess from '../lib/components/LabAccess.svelte';
   import TodoItemView from '../lib/components/TodoItem.svelte';
+  import PrepDetailModal from '../lib/components/PrepDetailModal.svelte';
+  import type { PrepItem } from '../lib/data/preparation';
 
   let prepCompletedIds = $state<Set<string>>(new Set());
+  let activePrepItem = $state<PrepItem | null>(null);
 
   onMount(async () => {
     await refreshHealth();
@@ -55,16 +58,25 @@
 
   async function onItemClick(item: TodoItem) {
     if (item.kind === 'prep-item' && item.prepItem) {
-      const id = item.prepItem.id;
-      if (prepCompletedIds.has(id)) {
-        await db.prepProgress.delete(id);
-        prepCompletedIds.delete(id);
-      } else {
-        await db.prepProgress.put({ itemId: id, completedAt: Date.now() });
-        prepCompletedIds.add(id);
-      }
-      prepCompletedIds = new Set(prepCompletedIds);
+      activePrepItem = item.prepItem;
     }
+  }
+
+  async function togglePrepCompleted() {
+    if (!activePrepItem) return;
+    const id = activePrepItem.id;
+    if (prepCompletedIds.has(id)) {
+      await db.prepProgress.delete(id);
+      prepCompletedIds.delete(id);
+    } else {
+      await db.prepProgress.put({ itemId: id, completedAt: Date.now() });
+      prepCompletedIds.add(id);
+    }
+    prepCompletedIds = new Set(prepCompletedIds);
+  }
+
+  function closePrepModal() {
+    activePrepItem = null;
   }
 </script>
 
@@ -99,7 +111,7 @@
     </ul>
     {#if $phase.stage === 'prep'}
       <p class="prep-progress">
-        準備チェックリスト: {prepCompletedIds.size} / 19 項目
+        準備チェックリスト: {prepCompletedIds.size} / 21 項目
       </p>
     {/if}
   </section>
@@ -112,6 +124,15 @@
     80 歳まで息子と歩き、孫を抱き、妻と旅に出られる体と心
   </footer>
 </div>
+
+{#if activePrepItem}
+  <PrepDetailModal
+    item={activePrepItem}
+    isCompleted={prepCompletedIds.has(activePrepItem.id)}
+    onClose={closePrepModal}
+    onToggleCompleted={togglePrepCompleted}
+  />
+{/if}
 
 <style>
   .page {

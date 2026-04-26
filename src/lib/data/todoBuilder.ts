@@ -98,9 +98,8 @@ function buildPrepTodos(ctx: BuildContext): TodoItem[] {
       startMin: null,
       endMin: null,
       title: item.title,
-      detail: item.detail,
-      prepItem: item,
-      cta: item.link ? { label: item.link.label, url: item.link.url } : undefined
+      detail: item.summary ?? item.detail,
+      prepItem: item
     });
   }
   return items;
