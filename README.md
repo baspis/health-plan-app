@@ -1,5 +1,7 @@
 # 道標 2（WebApp v2）
 
+**本番 URL**: <https://baspis.github.io/health-plan-app/>
+
 健康人生設計プラン v7.4 の実行支援 PWA。計画本体（`../README.md`、`../docs/`、`../DECISIONS.md`）を**毎日開かなくても運用できる**ためのダッシュボード。
 
 ## 設計思想
@@ -51,18 +53,17 @@ webapp/
 
 ## デプロイ
 
-GitHub Pages または Cloudflare Pages を想定。
+GitHub Pages（`baspis/health-plan-app` リポジトリ、Actions 経由）で自動デプロイ:
 
 ```bash
-npm run build
-# dist/ をデプロイ先にプッシュ
+npm run build   # ローカル確認用
+# push → .github/workflows/deploy.yml が自動で build + deploy
+git push origin main
 ```
 
-本番 URL を決めたら、以下を更新:
+本番 URL: <https://baspis.github.io/health-plan-app/>
 
-- `public/manifest.webmanifest` の `start_url`, `scope`
-- `shortcuts/README.md` の「<道標2の本番URL>」プレースホルダ
-- 上位 `../README.md` の詳細ドキュメント表
+`base: '/health-plan-app/'` は `NODE_ENV=production` のみ有効。ローカル dev (`npm run dev`) では `./` で動作。
 
 ## プライバシー
 

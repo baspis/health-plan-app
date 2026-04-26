@@ -45,11 +45,18 @@ export interface NotificationLog {
   dismissedAt?: number;
 }
 
+export interface PrepProgress {
+  itemId: string;
+  completedAt: number;
+  note?: string;
+}
+
 class DohyoDB extends Dexie {
   healthSnapshots!: Table<HealthSnapshot, string>;
   labResults!: Table<LabResult, number>;
   modeLog!: Table<ModeLogEntry, number>;
   notifications!: Table<NotificationLog, number>;
+  prepProgress!: Table<PrepProgress, string>;
 
   constructor() {
     super('dohyo2');
@@ -58,6 +65,13 @@ class DohyoDB extends Dexie {
       labResults: '++id, kind, dateISO, milestone',
       modeLog: '++id, dateISO, mode',
       notifications: '++id, dateISO, kind, severity'
+    });
+    this.version(2).stores({
+      healthSnapshots: 'dateISO, ingestedAt',
+      labResults: '++id, kind, dateISO, milestone',
+      modeLog: '++id, dateISO, mode',
+      notifications: '++id, dateISO, kind, severity',
+      prepProgress: 'itemId, completedAt'
     });
   }
 }

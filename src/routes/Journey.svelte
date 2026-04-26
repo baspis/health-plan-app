@@ -16,7 +16,11 @@
   const daysElapsed = $derived(daysSincePlanStart($phase, $clock));
 
   function milestoneStatus(m: Milestone): 'done' | 'current' | 'upcoming' {
-    const nextIdx = MILESTONES.findIndex((x) => x.daysFromPlanStart > daysElapsed);
+    if ($phase.stage === 'prep') {
+      if (m.id === 'prep') return 'current';
+      return 'upcoming';
+    }
+    const nextIdx = MILESTONES.findIndex((x) => x.daysFromPlanStart > daysElapsed && x.id !== 'prep');
     const currentIdx = nextIdx === -1 ? MILESTONES.length - 1 : nextIdx - 1;
     const myIdx = MILESTONES.findIndex((x) => x.id === m.id);
     if (myIdx < currentIdx) return 'done';
@@ -55,9 +59,13 @@
 <div class="journey">
   <div class="intro">
     <h2 class="intro-title">道のり</h2>
-    <p class="intro-sub num">
-      Day <span class="big">{daysElapsed}</span> / 1095（3 年）
-    </p>
+    {#if $phase.stage === 'prep'}
+      <p class="intro-sub">準備期 · 日数カウント前</p>
+    {:else}
+      <p class="intro-sub num">
+        Day <span class="big">{daysElapsed}</span> / 1095（3 年）
+      </p>
+    {/if}
   </div>
 
   <div class="timeline">
@@ -83,7 +91,13 @@
               <span class="stop-label">{m.label}</span>
               <span class="stop-sub">{m.sub}</span>
             </div>
-            {#if status === 'upcoming' && daysUntil(m) > 0}
+            {#if m.id === 'prep'}
+              {#if status === 'current'}
+                <span class="stop-days pill pill-warn">現在地</span>
+              {:else}
+                <span class="stop-days pill pill-ok">通過</span>
+              {/if}
+            {:else if status === 'upcoming' && daysUntil(m) > 0}
               <span class="stop-days num pill pill-neutral">残 {daysUntil(m)} 日</span>
             {:else if status === 'current'}
               <span class="stop-days pill pill-warn">現在地</span>

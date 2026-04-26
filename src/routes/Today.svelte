@@ -8,11 +8,13 @@
   import { detectAnomalies, logAnomalies, getRecentNotifications } from '../lib/notify/anomaly';
   import { ensureNotificationPermission, fireLocalNotification } from '../lib/notify/local';
   import type { NotificationLog } from '../lib/db/db';
+  import PrepChecklist from '../lib/components/PrepChecklist.svelte';
 
   let notifications = $state<NotificationLog[]>([]);
   let notifPermission = $state<NotificationPermission>('default');
 
   onMount(async () => {
+    if ($phase.stage === 'prep') return;
     await refreshHealth();
     const signals = detectAnomalies($health);
     if (signals.length > 0) {
@@ -67,6 +69,9 @@
   }
 </script>
 
+{#if $phase.stage === 'prep'}
+  <PrepChecklist />
+{:else}
 <div class="today">
   <div class="time-row">
     <span class="now-time num">{hours}:{minutes}</span>
@@ -138,6 +143,7 @@
     80 歳まで息子と歩き、孫を抱き、妻と旅に出られる体と心
   </footer>
 </div>
+{/if}
 
 <style>
   .today {

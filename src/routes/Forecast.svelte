@@ -73,7 +73,15 @@
     <p class="intro-sub">現在のペースを延長した場合の予測帯（確約ではなく参考）</p>
   </div>
 
-  {#if day0Weight === null || currentWeight === null}
+  {#if $phase.stage === 'prep'}
+    <div class="card empty prep-empty">
+      <p>事前準備期は予測なし。</p>
+      <p class="prep-hint">
+        Today タブで準備チェックリストを完了し、「今日から開始」を押すと Stage 0a が始まり、
+        Day 0 DEXA 結果の入力後にこの見通しが表示されます。
+      </p>
+    </div>
+  {:else if day0Weight === null || currentWeight === null}
     <div class="card empty">
       <p>Day 0 の DEXA 結果を Input タブから入力すると、ここに予測が表示されます。</p>
     </div>
@@ -104,6 +112,7 @@
     </section>
   {/if}
 
+  {#if $phase.stage !== 'prep'}
   <section class="vo2max card">
     <h3 class="vo2-title">VO2max Month 12 到達可能性</h3>
     <div class="vo2-body">
@@ -146,6 +155,7 @@
       <p class="glp-rec">{glp.recommendation}</p>
     </section>
   {/if}
+  {/if}
 
   <footer class="disclaimer">
     予測はあくまで参考。個人差・体調・家族イベント・季節で容易にずれる（ADR-008 日数断定を避ける方針）。
@@ -172,6 +182,15 @@
     color: var(--ink-muted);
     font-size: 13px;
     line-height: 1.7;
+  }
+  .prep-empty {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .prep-hint {
+    color: var(--ink-subtle);
+    font-size: 12px;
   }
   .pace {
     display: flex;

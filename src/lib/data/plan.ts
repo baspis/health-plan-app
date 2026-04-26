@@ -286,6 +286,7 @@ export interface Milestone {
 }
 
 export const MILESTONES: Milestone[] = [
+  { id: 'prep', label: '準備期完了', sub: '本人ペース・日数カウント前', stageStart: 'prep', daysFromPlanStart: -1, indicators: ['道具 8 / 医療 3 / アプリ 4 / 環境 4', '今日から開始ボタンで Stage 0a へ'] },
   { id: '0a', label: '着地期', sub: 'Day 0a 14 日間', stageStart: '0a', daysFromPlanStart: 0, indicators: ['体重測定なし', '運動なし'] },
   { id: '0b', label: '最小ベースライン', sub: 'Day 14-29', stageStart: '0b', daysFromPlanStart: 14, indicators: ['7:00 体重測定', '散歩 15-20 分'] },
   { id: 'day30', label: 'Day 30 判定', sub: '段階 1 本格開始', stageStart: '1', daysFromPlanStart: 30, indicators: ['睡眠 6.0h+ 安定', '仕事復帰'] },

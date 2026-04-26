@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-export type Stage = '0a' | '0b' | '1' | '2' | '3' | '4';
+export type Stage = 'prep' | '0a' | '0b' | '1' | '2' | '3' | '4';
 
 export interface PhaseState {
   stage: Stage;
@@ -17,7 +17,7 @@ function todayISO(d: Date = new Date()): string {
 
 function loadInitial(): PhaseState {
   const fallback: PhaseState = {
-    stage: '0a',
+    stage: 'prep',
     stageStartISO: todayISO(),
     planStartISO: todayISO()
   };
@@ -52,8 +52,13 @@ export function setStage(stage: Stage) {
   phase.update((cur) => ({
     stage,
     stageStartISO: todayISO(),
-    planStartISO: cur.planStartISO
+    planStartISO:
+      stage === '0a' && cur.stage === 'prep' ? todayISO() : cur.planStartISO
   }));
+}
+
+export function startFromPrep() {
+  setStage('0a');
 }
 
 export function daysSincePlanStart(state: PhaseState, now: Date = new Date()): number {
@@ -69,6 +74,7 @@ export function daysSinceStageStart(state: PhaseState, now: Date = new Date()): 
 }
 
 export const STAGE_META: Record<Stage, { label: string; jp: string; description: string }> = {
+  prep: { label: 'Prep', jp: '事前準備期', description: '本人ペース。道具を揃え、検査を予約し、アプリを設定する。完了したら今日から開始ボタンで Stage 0a へ。' },
   '0a': { label: 'Stage 0a', jp: '着地期', description: '葬儀後の 14 日間。体重測定も運動もなし。' },
   '0b': { label: 'Stage 0b', jp: '最小ベースライン期', description: '16 日間。朝 7:00 体重測定のみ。' },
   '1': { label: 'Phase 1', jp: 'ランプアップ', description: 'Week 1-4。関節慣らし、軽い有酸素のみ。' },

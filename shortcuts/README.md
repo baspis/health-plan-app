@@ -9,9 +9,9 @@
 ## 前提
 
 - iPhone iOS 16 以上（PWA Push を使うなら 16.4+）
-- 道標 2 PWA を Safari で開き、ホーム画面に追加済み（A2HS 済み）
+- 道標 2 PWA を Safari で開き（**本番 URL: <https://baspis.github.io/health-plan-app/>**）、ホーム画面に追加済み（A2HS 済み）
 - 道標 2 の **Input タブ** を開いて「**iOS Shortcuts 同期 URL**」に表示される URL をメモ（トークン付き）
-  - `https://<デプロイ先>/?ingest=1&token=<UUID>&date=YYYY-MM-DD&weight=...` の形式
+  - `https://baspis.github.io/health-plan-app/?ingest=1&token=<UUID>&date=YYYY-MM-DD&weight=...` の形式
 
 ## 手順
 
@@ -57,10 +57,10 @@
 **テキスト** アクションで以下のフォーマットで URL を作成:
 
 ```
-https://<道標2の本番URL>/?ingest=1&token=<あなたのトークン>&date=[今日のISO形式]&weight=[weight]&sleep=[sleep時間]&rhr=[rhr]&hrv=[hrv]&steps=[steps]&vo2max=[vo2max]&workoutMin=[ワークアウト分]
+https://baspis.github.io/health-plan-app/?ingest=1&token=<あなたのトークン>&date=[今日のISO形式]&weight=[weight]&sleep=[sleep時間]&rhr=[rhr]&hrv=[hrv]&steps=[steps]&vo2max=[vo2max]&workoutMin=[ワークアウト分]
 ```
 
-- `<道標2の本番URL>` と `<あなたのトークン>` は Input タブで確認した値を貼る
+- `<あなたのトークン>` は Input タブで確認した値を貼る
 - 変数は **マジック変数**（Shortcuts の機能）で埋め込む
 - 睡眠は分単位 → 時間に変換する式を挟む（`[sleep] / 60` のような計算アクションを追加）
 
